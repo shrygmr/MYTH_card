@@ -161,6 +161,17 @@
         if (!localStorage.getItem('myth_reviews')) {
             localStorage.setItem('myth_reviews', JSON.stringify([]));
         }
+        if (!localStorage.getItem('myth_users')) {
+            const defaultUsers = {
+                students: {
+                    "201100000": { password: "100001", registeredAt: new Date().toISOString() }
+                },
+                alumni: {
+                    "05555555555": { password: "1234", registeredAt: new Date().toISOString() }
+                }
+            };
+            localStorage.setItem('myth_users', JSON.stringify(defaultUsers));
+        }
     }
 
     // Run on load

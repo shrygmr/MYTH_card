@@ -112,50 +112,59 @@
 
     // --- Student Form Logic ---
     const studentIdInput = document.getElementById('studentId');
-    const studentCardGroup = document.getElementById('studentCardGroup');
-    const studentCardNoInput = document.getElementById('studentCardNo');
+    const studentPassInput = document.getElementById('studentPass');
+    const studentHelpText = document.getElementById('studentHelpText');
     const studentSubmitBtn = document.getElementById('studentSubmitBtn');
 
     if(studentIdInput) {
       studentIdInput.addEventListener('input', (e) => {
         const val = e.target.value.trim();
         if (!val) {
-          studentCardGroup.style.display = 'none';
+          studentHelpText.style.display = 'none';
           studentSubmitBtn.textContent = 'Giriş Yap';
-          studentCardNoInput.removeAttribute('required');
           return;
         }
 
         const users = getUsers();
         if (users.students[val]) {
           // Registered
-          studentCardGroup.style.display = 'none';
+          studentHelpText.style.display = 'none';
           studentSubmitBtn.textContent = 'Giriş Yap';
-          studentCardNoInput.removeAttribute('required');
         } else {
           // Not Registered
-          studentCardGroup.style.display = 'block';
-          studentSubmitBtn.textContent = 'Üyeliği Tamamla ve Giriş Yap';
-          studentCardNoInput.setAttribute('required', 'true');
+          studentHelpText.style.display = 'block';
+          studentSubmitBtn.textContent = 'Kayıt Ol ve Giriş Yap';
         }
       });
 
       studentForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const studentId = studentIdInput.value.trim();
+        const pass = studentPassInput.value.trim();
         const users = getUsers();
 
         if (users.students[studentId]) {
           // Existing user login
-          loginUser('student', studentId);
+          if (users.students[studentId].password === pass) {
+            loginUser('student', studentId);
+          } else {
+            alert("Hatalı şifre. Lütfen kart numaranızı kontrol edin.");
+          }
         } else {
           // New user registration
-          const cardNo = studentCardNoInput.value.trim();
-          if (!cardNo) {
-            alert("Lütfen kart numaranızı girin.");
+          if (pass.length !== 6 || isNaN(pass)) {
+            alert("Lütfen MYTh kartınızın üzerindeki 6 haneli numarayı girin.");
             return;
           }
-          users.students[studentId] = { cardNo: cardNo, registeredAt: new Date().toISOString() };
+          
+          // Check if this PIN is already used by another student
+          const isPinUsed = Object.values(users.students).some(s => s.password === pass);
+          if (isPinUsed) {
+            alert("Bu kart numarası zaten başka bir öğrenci tarafından kullanılıyor.");
+            return;
+          }
+
+          users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
           saveUsers(users);
           loginUser('student', studentId);
         }
@@ -164,50 +173,51 @@
 
     // --- Alumni Form Logic ---
     const alumniPhoneInput = document.getElementById('alumniPhone');
-    const alumniCardGroup = document.getElementById('alumniCardGroup');
-    const alumniCardNoInput = document.getElementById('alumniCardNo');
+    const alumniPassInput = document.getElementById('alumniPass');
+    const alumniHelpText = document.getElementById('alumniHelpText');
     const alumniSubmitBtn = document.getElementById('alumniSubmitBtn');
 
     if(alumniPhoneInput) {
       alumniPhoneInput.addEventListener('input', (e) => {
         const val = e.target.value.trim();
         if (!val) {
-          alumniCardGroup.style.display = 'none';
+          alumniHelpText.style.display = 'none';
           alumniSubmitBtn.textContent = 'Giriş Yap';
-          alumniCardNoInput.removeAttribute('required');
           return;
         }
 
         const users = getUsers();
         if (users.alumni[val]) {
           // Registered
-          alumniCardGroup.style.display = 'none';
+          alumniHelpText.style.display = 'none';
           alumniSubmitBtn.textContent = 'Giriş Yap';
-          alumniCardNoInput.removeAttribute('required');
         } else {
           // Not Registered
-          alumniCardGroup.style.display = 'block';
-          alumniSubmitBtn.textContent = 'Üyeliği Tamamla ve Giriş Yap';
-          alumniCardNoInput.setAttribute('required', 'true');
+          alumniHelpText.style.display = 'block';
+          alumniSubmitBtn.textContent = 'Kayıt Ol ve Giriş Yap';
         }
       });
 
       alumniForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const phone = alumniPhoneInput.value.trim();
+        const pass = alumniPassInput.value.trim();
         const users = getUsers();
 
         if (users.alumni[phone]) {
           // Existing user login
-          loginUser('alumni', phone);
+          if (users.alumni[phone].password === pass) {
+            loginUser('alumni', phone);
+          } else {
+            alert("Hatalı şifre.");
+          }
         } else {
           // New user registration
-          const cardNo = alumniCardNoInput.value.trim();
-          if (!cardNo) {
-            alert("Lütfen kart numaranızı girin.");
+          if(pass.length < 4) {
+            alert("Şifreniz en az 4 haneli olmalıdır.");
             return;
           }
-          users.alumni[phone] = { cardNo: cardNo, registeredAt: new Date().toISOString() };
+          users.alumni[phone] = { password: pass, registeredAt: new Date().toISOString() };
           saveUsers(users);
           loginUser('alumni', phone);
         }

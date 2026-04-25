@@ -43,10 +43,10 @@
             <label for="studentId"><i class="fas fa-user-graduate"></i> Öğrenci Numarası</label>
             <input type="text" id="studentId" placeholder="Örn: 201100000" required>
           </div>
-          <div class="form-group" id="studentCardGroup" style="display: none;">
-            <label for="studentCardNo"><i class="fas fa-credit-card"></i> Kart Numarası</label>
-            <input type="text" id="studentCardNo" placeholder="Kartın üzerindeki numara">
-            <small>Sistemimizde kaydınız bulunamadı. Lütfen ilk girişiniz için kart numaranızı girin.</small>
+          <div class="form-group">
+            <label for="studentPass"><i class="fas fa-lock"></i> Şifre (Kart Numarası)</label>
+            <input type="password" id="studentPass" placeholder="6 haneli şifreniz" required maxlength="6">
+            <small id="studentHelpText" style="display: none; color: var(--primary); margin-top: 5px;">Sistemimizde kaydınız yok. Girdiğiniz 6 haneli şifre hesabınıza tanımlanacaktır.</small>
           </div>
           <button type="submit" class="btn btn-primary" id="studentSubmitBtn">Giriş Yap</button>
         </form>
@@ -57,10 +57,10 @@
             <label for="alumniPhone"><i class="fas fa-phone"></i> Telefon Numarası</label>
             <input type="tel" id="alumniPhone" placeholder="05XX XXX XX XX" required>
           </div>
-          <div class="form-group" id="alumniCardGroup" style="display: none;">
-            <label for="alumniCardNo"><i class="fas fa-credit-card"></i> Kart Numarası</label>
-            <input type="text" id="alumniCardNo" placeholder="Kartın üzerindeki numara">
-            <small>Sistemimizde kaydınız bulunamadı. Lütfen ilk girişiniz için kart numaranızı girin.</small>
+          <div class="form-group">
+            <label for="alumniPass"><i class="fas fa-lock"></i> Şifre</label>
+            <input type="password" id="alumniPass" placeholder="Şifreniz" required>
+            <small id="alumniHelpText" style="display: none; color: var(--primary); margin-top: 5px;">Sistemimizde kaydınız yok. Girdiğiniz şifre hesabınıza tanımlanacaktır.</small>
           </div>
           <button type="submit" class="btn btn-primary" id="alumniSubmitBtn">Giriş Yap</button>
         </form>
