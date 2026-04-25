@@ -47,6 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (target === 'venues') renderVenuesTable();
             if (target === 'deals') renderDealsTable();
             if (target === 'reviews') renderReviewsTable();
+            if (target === 'users') renderUsersTable();
         });
     });
 
@@ -304,9 +305,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // ---------------------------------------------
+    // Users Logic
+    // ---------------------------------------------
+    function renderUsersTable() {
+        const usersStr = localStorage.getItem('myth_users');
+        const users = usersStr ? JSON.parse(usersStr) : { students: {}, alumni: {} };
+        const tbody = document.getElementById('usersTableBody');
+        
+        let html = '';
+
+        // Students
+        for (const [id, data] of Object.entries(users.students)) {
+            const date = data.registeredAt ? new Date(data.registeredAt).toLocaleString('tr-TR') : 'Bilinmiyor';
+            html += `
+                <tr>
+                    <td><span class="badge" style="background:var(--primary); color:white; padding:4px 8px; border-radius:4px;">Öğrenci</span></td>
+                    <td><strong>${id}</strong></td>
+                    <td><i class="fas fa-key" style="color:var(--secondary); margin-right:5px;"></i> ${data.password}</td>
+                    <td>${date}</td>
+                </tr>
+            `;
+        }
+
+        // Alumni
+        for (const [phone, data] of Object.entries(users.alumni)) {
+            const date = data.registeredAt ? new Date(data.registeredAt).toLocaleString('tr-TR') : 'Bilinmiyor';
+            html += `
+                <tr>
+                    <td><span class="badge" style="background:var(--secondary); color:white; padding:4px 8px; border-radius:4px;">Mezun</span></td>
+                    <td><strong>${phone}</strong></td>
+                    <td><i class="fas fa-lock" style="color:var(--primary); margin-right:5px;"></i> ${data.password}</td>
+                    <td>${date}</td>
+                </tr>
+            `;
+        }
+
+        tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Henüz kayıtlı kullanıcı yok.</td></tr>';
+    }
+
     // Init
     renderDashboard();
     renderVenuesTable();
     renderDealsTable();
     renderReviewsTable();
+    renderUsersTable();
 });

@@ -23,6 +23,7 @@
         <button class="nav-btn" data-target="venues"><i class="fas fa-store"></i> Mekan Yönetimi</button>
         <button class="nav-btn" data-target="deals"><i class="fas fa-fire"></i> Fırsat Yönetimi</button>
         <button class="nav-btn" data-target="reviews"><i class="fas fa-comments"></i> Yorum Yönetimi</button>
+        <button class="nav-btn" data-target="users"><i class="fas fa-users"></i> Kayıtlı Kullanıcılar</button>
       </nav>
       <div class="sidebar-footer">
         <button id="logoutBtn" class="btn btn-danger" style="width: 100%;"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</button>
@@ -135,6 +136,29 @@
                 </tr>
               </thead>
               <tbody id="reviewsTableBody">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Users Module -->
+        <section id="users" class="admin-module">
+          <div class="module-header">
+            <h2>Kayıtlı Kullanıcılar</h2>
+            <p style="color: var(--text-muted);">Sisteme kayıtlı öğrenci ve mezunların şifre eşleştirmelerini görebilirsiniz.</p>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Kullanıcı Tipi</th>
+                  <th>Kullanıcı Adı / ID</th>
+                  <th>Şifre (Kart No / Belirlenen)</th>
+                  <th>Kayıt Tarihi</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody">
                 <!-- JS populated -->
               </tbody>
             </table>
