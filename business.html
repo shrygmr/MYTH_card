@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYTh Kart | İşletme Paneli</title>
+  
+  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/admin.css?v=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo" style="width: 50px;">
+        <h2>İşletme Paneli</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-target="dashboard"><i class="fas fa-store"></i> Mekanım</button>
+        <button class="nav-btn" data-target="reviews"><i class="fas fa-star"></i> Yorumlar</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn btn-danger" style="width: 100%;"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1>İşletme Kontrol Paneli</h1>
+        <div class="admin-user-info">
+          <i class="fas fa-store-alt"></i> <span id="businessNameDisplay">İşletme</span>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Dashboard Module -->
+        <section id="dashboard" class="admin-module active">
+          <h2>Mekan Bilgileriniz</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="fas fa-percent"></i>
+              <div class="stat-info">
+                <h3>Güncel İndiriminiz</h3>
+                <p id="bDiscount">%0</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-comments"></i>
+              <div class="stat-info">
+                <h3>Gelen Yorum Sayısı</h3>
+                <p id="bReviewCount">0</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-star-half-alt"></i>
+              <div class="stat-info">
+                <h3>Ortalama Puan</h3>
+                <p id="bAvgRating">0.0</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 40px;">
+            <h3>Aktif Kampanyalarınız (Haftanın Fırsatı)</h3>
+            <div class="table-container" style="margin-top: 15px;">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Başlık</th>
+                    <th>Açıklama</th>
+                    <th>Son Geçerlilik</th>
+                  </tr>
+                </thead>
+                <tbody id="bDealsTableBody">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reviews Module -->
+        <section id="reviews" class="admin-module">
+          <div class="module-header">
+            <h2>Müşteri Yorumları</h2>
+            <p style="color: var(--text-muted);">Müşterilerinizin mekanınız hakkındaki anonim geri bildirimleri.</p>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Tarih</th>
+                  <th>Kullanıcı (Anonim)</th>
+                  <th>Puan</th>
+                  <th>Yorum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="bReviewsTableBody">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js?v=2"></script>
+  <script src="js/business.js?v=1"></script>
+</body>
+</html>

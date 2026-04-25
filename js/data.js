@@ -1,0 +1,192 @@
+// =============================================
+// MYTh Kart — Database Seeder & Manager
+// =============================================
+
+(function() {
+    const DEFAULT_VENUES = [
+        {
+            id: 1,
+            name: "Tunalı Roasters",
+            category: "kafe",
+            region: "Çankaya",
+            address: "Tunalı Hilmi Cad. No:114, Çankaya/Ankara",
+            discount: 20,
+            description: "Üçüncü nesil kahve ve günlük taze tatlılar.",
+            image: "",
+            lat: 39.9015,
+            lng: 32.8615,
+            popular: true,
+            isNew: false,
+            phone: "0312 123 4567"
+        },
+        {
+            id: 2,
+            name: "Bahçeli Burger",
+            category: "restoran",
+            region: "Bahçelievler",
+            address: "7. Cadde No:45, Bahçelievler/Ankara",
+            discount: 15,
+            description: "El yapımı burger ve çıtır patates uzmanı.",
+            image: "",
+            lat: 39.9192,
+            lng: 32.8251,
+            popular: true,
+            isNew: false,
+            phone: "0312 234 5678"
+        },
+        {
+            id: 3,
+            name: "Kızılay Game & VR",
+            category: "oyun",
+            region: "Kızılay",
+            address: "Atatürk Bulvarı No:95, Kızılay/Ankara",
+            discount: 25,
+            description: "Ankara'nın en büyük VR ve PC oyun merkezi.",
+            image: "",
+            lat: 39.9208,
+            lng: 32.8541,
+            popular: false,
+            isNew: true,
+            phone: "0312 345 6789"
+        },
+        {
+            id: 4,
+            name: "Escape Ankara",
+            category: "eglence",
+            region: "Çankaya",
+            address: "Kavaklıdere Mah. Bestekar Cad. No:30, Çankaya",
+            discount: 30,
+            description: "Korku ve gizem temalı 4 farklı kaçış odası.",
+            image: "",
+            lat: 39.9070,
+            lng: 32.8570,
+            popular: true,
+            isNew: true,
+            phone: "0312 456 7890"
+        },
+        {
+            id: 5,
+            name: "Bilkent Station",
+            category: "kafe",
+            region: "Bilkent",
+            address: "Bilkent Center AVM, Bilkent/Ankara",
+            discount: 15,
+            description: "Kampüs içi sakin çalışma ve dinlenme alanı.",
+            image: "",
+            lat: 39.8765,
+            lng: 32.7485,
+            popular: false,
+            isNew: false,
+            phone: "0312 567 8901"
+        }
+    ];
+
+    const DEFAULT_DEALS = [
+        {
+            id: 1,
+            venueId: 1, // Tunalı Roasters
+            title: "Kahve Alana Kurabiye Bedava!",
+            description: "Hafta içi 10:00 - 14:00 arası herhangi bir filtre kahve alımında damla çikolatalı kurabiye hediye.",
+            validUntil: "2026-05-01",
+            type: "hediye"
+        },
+        {
+            id: 2,
+            venueId: 2, // Bahçeli Burger
+            title: "Öğrenci Menüsü Özel Fiyat",
+            description: "Cheeseburger + Büyük Boy Patates + İçecek sadece MYTh üyelerine %30 Ekstra İndirimli!",
+            validUntil: "2026-04-30",
+            type: "indirim"
+        }
+    ];
+
+    // Auth seeds
+    const DEFAULT_ADMINS = {
+        "sahra.admin": { password: "MythAdmin2026!01", name: "Sahra" },
+        "batu.admin": { password: "MythAdmin2026!02", name: "Batu" },
+        "zersah.admin": { password: "MythAdmin2026!03", name: "Zerşah" },
+        "ece.admin": { password: "MythAdmin2026!04", name: "Ece" },
+        "mert.admin": { password: "MythAdmin2026!05", name: "Mert" },
+        "sila.admin": { password: "MythAdmin2026!06", name: "Sıla" },
+        "murat.admin": { password: "MythAdmin2026!07", name: "Murat" },
+        "cansin.admin": { password: "MythAdmin2026!08", name: "Cansın" },
+        "peker.admin": { password: "MythAdmin2026!09", name: "Peker" },
+        "begum.admin": { password: "MythAdmin2026!10", name: "Begüm" }
+    };
+
+    const DEFAULT_BUSINESSES = {
+        "tunali": { password: "123", venueId: 1, name: "Tunalı Roasters Yönetim" },
+        "bahceli": { password: "123", venueId: 2, name: "Bahçeli Burger Yönetim" }
+    };
+
+    // Constants
+    const CATEGORIES = [
+        { id: "tumu", label: "Tümü", icon: "🏷️" },
+        { id: "kafe", label: "Kafe", icon: "☕" },
+        { id: "restoran", label: "Restoran", icon: "🍽️" },
+        { id: "oyun", label: "Oyun", icon: "🎮" },
+        { id: "eglence", label: "Eğlence", icon: "🎉" }
+    ];
+
+    const REGIONS = [
+        "Tümü",
+        "Bahçelievler",
+        "Bilkent",
+        "Çankaya",
+        "Kızılay",
+        "Etimesgut",
+        "Keçiören"
+    ];
+
+    const SORT_OPTIONS = [
+        { id: "default", label: "Varsayılan" },
+        { id: "discount-high", label: "İndirim (Yüksekten Düşüğe)" },
+        { id: "discount-low", label: "İndirim (Düşükten Yükseğe)" },
+        { id: "popular", label: "En Popüler" },
+        { id: "newest", label: "En Yeni" }
+    ];
+
+    function initializeDatabase() {
+        if (!localStorage.getItem('myth_venues')) {
+            localStorage.setItem('myth_venues', JSON.stringify(DEFAULT_VENUES));
+        }
+        if (!localStorage.getItem('myth_deals')) {
+            localStorage.setItem('myth_deals', JSON.stringify(DEFAULT_DEALS));
+        }
+        // Always overwrite admins so the new demo users are seeded
+        localStorage.setItem('myth_admins', JSON.stringify(DEFAULT_ADMINS));
+        if (!localStorage.getItem('myth_businesses')) {
+            localStorage.setItem('myth_businesses', JSON.stringify(DEFAULT_BUSINESSES));
+        }
+        if (!localStorage.getItem('myth_reviews')) {
+            localStorage.setItem('myth_reviews', JSON.stringify([]));
+        }
+    }
+
+    // Run on load
+    initializeDatabase();
+
+    // Export public DB interface
+    window.mythDB = {
+        getVenues: () => JSON.parse(localStorage.getItem('myth_venues') || '[]'),
+        saveVenues: (data) => localStorage.setItem('myth_venues', JSON.stringify(data)),
+        
+        getDeals: () => JSON.parse(localStorage.getItem('myth_deals') || '[]'),
+        saveDeals: (data) => localStorage.setItem('myth_deals', JSON.stringify(data)),
+        
+        getReviews: () => JSON.parse(localStorage.getItem('myth_reviews') || '[]'),
+        saveReviews: (data) => localStorage.setItem('myth_reviews', JSON.stringify(data)),
+        
+        getCategories: () => CATEGORIES,
+        getRegions: () => REGIONS,
+        getSortOptions: () => SORT_OPTIONS
+    };
+
+    // For backwards compatibility with map.js & app.js until they are updated
+    // We bind the data to the global scope as if it was defined statically.
+    window.venues = window.mythDB.getVenues();
+    window.categories = CATEGORIES;
+    window.regions = REGIONS;
+    window.sortOptions = SORT_OPTIONS;
+    
+})();

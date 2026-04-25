@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYTh Kart | Yönetici Paneli</title>
+  
+  <link rel="stylesheet" href="css/style.css?v=4">
+  <link rel="stylesheet" href="css/admin.css?v=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo" style="width: 50px;">
+        <h2>Admin Panel</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-target="dashboard"><i class="fas fa-chart-line"></i> Dashboard</button>
+        <button class="nav-btn" data-target="venues"><i class="fas fa-store"></i> Mekan Yönetimi</button>
+        <button class="nav-btn" data-target="deals"><i class="fas fa-fire"></i> Fırsat Yönetimi</button>
+        <button class="nav-btn" data-target="reviews"><i class="fas fa-comments"></i> Yorum Yönetimi</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn btn-danger" style="width: 100%;"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1>Yönetici Paneli</h1>
+        <div class="admin-user-info">
+          <i class="fas fa-user-shield"></i> <span id="adminNameDisplay">Yetkili</span>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Dashboard Module -->
+        <section id="dashboard" class="admin-module active">
+          <h2>Genel Bakış</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="fas fa-store"></i>
+              <div class="stat-info">
+                <h3>Kayıtlı Mekan</h3>
+                <p id="statVenuesCount">0</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-fire"></i>
+              <div class="stat-info">
+                <h3>Aktif Fırsat</h3>
+                <p id="statDealsCount">0</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-comments"></i>
+              <div class="stat-info">
+                <h3>Toplam Yorum</h3>
+                <p id="statReviewsCount">0</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Venues Module -->
+        <section id="venues" class="admin-module">
+          <div class="module-header">
+            <h2>Mekan Yönetimi</h2>
+            <button class="btn btn-primary" id="openAddVenueModal"><i class="fas fa-plus"></i> Yeni Mekan Ekle</button>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Mekan Adı</th>
+                  <th>Kategori</th>
+                  <th>Bölge</th>
+                  <th>İndirim</th>
+                  <th>İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="venuesTableBody">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Deals Module -->
+        <section id="deals" class="admin-module">
+          <div class="module-header">
+            <h2>Fırsat Yönetimi</h2>
+            <button class="btn btn-primary" id="openAddDealModal"><i class="fas fa-plus"></i> Yeni Fırsat Ekle</button>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Mekan</th>
+                  <th>Fırsat Başlığı</th>
+                  <th>Geçerlilik</th>
+                  <th>İşlemler</th>
+                </tr>
+              </thead>
+              <tbody id="dealsTableBody">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Reviews Module -->
+        <section id="reviews" class="admin-module">
+          <div class="module-header">
+            <h2>Yorum Yönetimi</h2>
+            <p style="color: var(--text-muted);">Yorumları gerçek kullanıcı kimlikleriyle görebilirsiniz.</p>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Tarih</th>
+                  <th>Mekan</th>
+                  <th>Gerçek Kimlik</th>
+                  <th>Puan</th>
+                  <th>Yorum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="reviewsTableBody">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div class="login-overlay hidden" id="venueModal">
+    <div class="login-modal" style="max-width: 600px;">
+      <button class="close-modal-btn" id="closeVenueModal"><i class="fas fa-times"></i></button>
+      <h2>Mekan Ekle / Düzenle</h2>
+      <form id="venueForm" class="auth-form active" style="margin-top: 20px;">
+        <input type="hidden" id="vId">
+        <div class="form-group">
+          <label>Mekan Adı</label>
+          <input type="text" id="vName" required>
+        </div>
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex:1;">
+            <label>Kategori</label>
+            <select id="vCategory" class="form-group-select" required>
+              <option value="kafe">Kafe</option>
+              <option value="restoran">Restoran</option>
+              <option value="oyun">Oyun</option>
+              <option value="eglence">Eğlence</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label>Bölge</label>
+            <input type="text" id="vRegion" required>
+          </div>
+          <div style="flex:1;">
+            <label>İndirim Oranı (%)</label>
+            <input type="number" id="vDiscount" required>
+          </div>
+        </div>
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex:1;">
+            <label>Enlem (Lat)</label>
+            <input type="number" step="0.0001" id="vLat" value="39.9207" required>
+          </div>
+          <div style="flex:1;">
+            <label>Boylam (Lng)</label>
+            <input type="number" step="0.0001" id="vLng" value="32.8541" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Adres</label>
+          <input type="text" id="vAddress" required>
+        </div>
+        <div class="form-group">
+          <label>Açıklama</label>
+          <textarea id="vDesc" rows="2" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="login-overlay hidden" id="dealModal">
+    <div class="login-modal" style="max-width: 500px;">
+      <button class="close-modal-btn" id="closeDealModal"><i class="fas fa-times"></i></button>
+      <h2>Fırsat Ekle / Düzenle</h2>
+      <form id="dealForm" class="auth-form active" style="margin-top: 20px;">
+        <input type="hidden" id="dId">
+        <div class="form-group">
+          <label>Mekan</label>
+          <select id="dVenueId" class="form-group-select" required></select>
+        </div>
+        <div class="form-group">
+          <label>Başlık</label>
+          <input type="text" id="dTitle" required>
+        </div>
+        <div class="form-group" style="display: flex; gap: 10px;">
+          <div style="flex:1;">
+            <label>Tip</label>
+            <select id="dType" class="form-group-select" required>
+              <option value="indirim">İndirim</option>
+              <option value="hediye">Hediye</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label>Son Geçerlilik</label>
+            <input type="date" id="dValidUntil" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Açıklama</label>
+          <textarea id="dDesc" rows="3" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Kaydet</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js?v=2"></script>
+  <script src="js/admin.js?v=1"></script>
+</body>
+</html>

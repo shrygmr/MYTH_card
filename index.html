@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="MYTh Kart — Mühendislik ve Yöneticilik Topluluğu öğrenci indirim kartı. Anlaşmalı kafe, restoran ve eğlence mekanlarında özel indirimler.">
+  <title>MYTh Kart | Öğrenci İndirim Kartı</title>
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css?v=4">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+
+<body>
+
+  <!-- ========== LOGIN MODAL ========== -->
+  <div class="login-overlay hidden" id="loginOverlay">
+    <div class="login-modal">
+      <div class="login-header">
+        <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo" class="login-logo">
+        <h2>MYTh Kart'a Hoş Geldiniz</h2>
+        <p>Devam etmek için lütfen giriş yapın veya üye olun.</p>
+      </div>
+      
+      <div class="login-tabs">
+        <button class="login-tab active" data-tab="student">Öğrenci</button>
+        <button class="login-tab" data-tab="alumni">Mezun</button>
+        <button class="login-tab" data-tab="business">İşletme</button>
+        <button class="login-tab" data-tab="admin">Yetkili</button>
+      </div>
+
+      <div class="login-body">
+        <!-- Student Form -->
+        <form id="studentForm" class="auth-form active">
+          <div class="form-group">
+            <label for="studentId"><i class="fas fa-user-graduate"></i> Öğrenci Numarası</label>
+            <input type="text" id="studentId" placeholder="Örn: 201100000" required>
+          </div>
+          <div class="form-group" id="studentCardGroup" style="display: none;">
+            <label for="studentCardNo"><i class="fas fa-credit-card"></i> Kart Numarası</label>
+            <input type="text" id="studentCardNo" placeholder="Kartın üzerindeki numara">
+            <small>Sistemimizde kaydınız bulunamadı. Lütfen ilk girişiniz için kart numaranızı girin.</small>
+          </div>
+          <button type="submit" class="btn btn-primary" id="studentSubmitBtn">Giriş Yap</button>
+        </form>
+
+        <!-- Alumni Form -->
+        <form id="alumniForm" class="auth-form" style="display: none;">
+          <div class="form-group">
+            <label for="alumniPhone"><i class="fas fa-phone"></i> Telefon Numarası</label>
+            <input type="tel" id="alumniPhone" placeholder="05XX XXX XX XX" required>
+          </div>
+          <div class="form-group" id="alumniCardGroup" style="display: none;">
+            <label for="alumniCardNo"><i class="fas fa-credit-card"></i> Kart Numarası</label>
+            <input type="text" id="alumniCardNo" placeholder="Kartın üzerindeki numara">
+            <small>Sistemimizde kaydınız bulunamadı. Lütfen ilk girişiniz için kart numaranızı girin.</small>
+          </div>
+          <button type="submit" class="btn btn-primary" id="alumniSubmitBtn">Giriş Yap</button>
+        </form>
+
+        <!-- Business Form -->
+        <form id="businessForm" class="auth-form" style="display: none;">
+          <div class="form-group">
+            <label for="businessId"><i class="fas fa-store"></i> İşletme Kullanıcı Adı</label>
+            <input type="text" id="businessId" placeholder="Örn: tunali" required>
+          </div>
+          <div class="form-group">
+            <label for="businessPass"><i class="fas fa-lock"></i> Şifre</label>
+            <input type="password" id="businessPass" required>
+          </div>
+          <button type="submit" class="btn btn-primary" id="businessSubmitBtn">İşletme Paneline Giriş</button>
+        </form>
+
+        <!-- Admin Form -->
+        <form id="adminForm" class="auth-form" style="display: none;">
+          <div class="form-group">
+            <label for="adminId"><i class="fas fa-shield-alt"></i> Yetkili Kullanıcı Adı</label>
+            <input type="text" id="adminId" placeholder="Örn: admin" required>
+          </div>
+          <div class="form-group">
+            <label for="adminPass"><i class="fas fa-lock"></i> Şifre</label>
+            <input type="password" id="adminPass" required>
+          </div>
+          <button type="submit" class="btn btn-primary" id="adminSubmitBtn">Yönetim Paneline Giriş</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== REVIEW MODAL ========== -->
+  <div class="login-overlay hidden" id="reviewOverlay">
+    <div class="login-modal">
+      <button class="close-modal-btn" id="closeReviewModal"><i class="fas fa-times"></i></button>
+      <div class="login-header">
+        <h2>Mekan Değerlendir</h2>
+        <p>Gittiğiniz mekanı seçip yıldız verin ve yorumunuzu paylaşın.</p>
+      </div>
+
+      <div class="login-body">
+        <form id="reviewForm" class="auth-form active">
+          <div class="form-group">
+            <label for="reviewVenue"><i class="fas fa-map-marker-alt"></i> Mekan Seçin</label>
+            <select id="reviewVenue" class="form-group-select" required>
+              <option value="">Seçiniz...</option>
+              <!-- Populated by JS -->
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label><i class="fas fa-star"></i> Puanınız</label>
+            <div class="star-rating" id="starRating">
+              <i class="fas fa-star" data-value="1"></i>
+              <i class="fas fa-star" data-value="2"></i>
+              <i class="fas fa-star" data-value="3"></i>
+              <i class="fas fa-star" data-value="4"></i>
+              <i class="fas fa-star" data-value="5"></i>
+            </div>
+            <input type="hidden" id="reviewRating" value="0" required>
+          </div>
+
+          <div class="form-group">
+            <label for="reviewText"><i class="fas fa-comment"></i> Yorumunuz</label>
+            <textarea id="reviewText" rows="4" placeholder="Mekan hakkındaki düşüncelerinizi yazın..." required></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Yorumu Gönder</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#" class="nav-logo">
+        <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo" class="logo-img">
+        <span>MYTh</span>
+      </a>
+
+      <div class="nav-links" id="navLinks">
+        <a href="#about" class="nav-link">Biz Kimiz?</a>
+        <a href="#venues" class="nav-link">MYTh Kart</a>
+        <a href="#map" class="nav-link">Harita</a>
+        <div id="navbarUserActions" style="display:inline-block; margin-left:15px;">
+          <!-- JS fills this -->
+          <button class="btn btn-primary" id="navLoginBtn" style="padding: 8px 15px; font-size: 0.9rem;"><i class="fas fa-user"></i> Giriş Yap</button>
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+          <i class="fas fa-moon" id="themeIcon"></i>
+        </button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menü">
+          <i class="fas fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero" id="hero">
+    <div class="hero-bg">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Mühendislik ve Yöneticilik Topluluğu
+      </div>
+      <h1 class="hero-title">
+        <span class="highlight">MYTh Kart</span> ile<br>Her Yerde İndirim
+      </h1>
+      <p class="hero-description">
+        Öğrenci kartınla anlaşmalı kafe, restoran ve eğlence mekanlarında özel indirimlerden yararlan. Keşfetmeye başla!
+      </p>
+      <div class="hero-buttons">
+        <a href="#about" class="btn btn-primary">
+          <i class="btn-icon fas fa-users"></i> Biz Kimiz?
+        </a>
+        <a href="#venues" class="btn btn-secondary">
+          <i class="btn-icon fas fa-credit-card"></i> MYTh Kart
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+
+  <!-- ========== ABOUT SECTION ========== -->
+  <section class="about-section" id="about">
+    <div class="container">
+      <div class="about-grid">
+        <div class="about-text">
+          <h2>Biz Kimiz?</h2>
+          <p>
+            <strong>Mühendislik ve Yöneticilik Topluluğu (MYT)</strong>, üniversitemizin en aktif öğrenci
+            topluluklarından biridir.
+            Amacımız, mühendislik ve yöneticilik alanlarında öğrencileri bir araya getirerek, bilgi paylaşımını
+            artırmak,
+            kariyer gelişimlerine katkıda bulunmak ve sosyal bir ağ oluşturmaktır.
+          </p>
+          <p>
+            Topluluğumuzun sunduğu <strong>MYTh Kart</strong>, üyelerimize Türkiye genelindeki anlaşmalı kafe,
+            restoran,
+            oyun salonları ve eğlence mekanlarında özel indirimler sağlamaktadır. Kartını al, indirimlerin keyfini
+            çıkar!
+          </p>
+          <div class="social-buttons">
+            <a href="https://www.instagram.com/myt.etu/" target="_blank" class="social-btn instagram">
+              <i class="fab fa-instagram"></i> Instagram
+            </a>
+            <a href="https://www.linkedin.com/company/tobb-et%C3%BC-m%C3%BChendislik-ve-y%C3%B6neticilik-toplulu%C4%9Fu"
+              target="_blank" class="social-btn linkedin">
+              <i class="fab fa-linkedin"></i> LinkedIn
+            </a>
+            <a href="https://chat.whatsapp.com/GRsldpURG4GLo5LO4BXXwx" target="_blank" class="social-btn whatsapp">
+              <i class="fab fa-whatsapp"></i> WhatsApp Grubu
+            </a>
+          </div>
+        </div>
+
+        <div class="about-visual">
+          <div class="about-card-visual">
+            <div class="card-logo">
+              <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo">
+            </div>
+            <div class="card-subtitle">Öğrenci İndirim Kartı</div>
+          </div>
+          <div class="about-stats">
+            <div class="stat-item">
+              <div class="stat-number" id="statMembers">500+</div>
+              <div class="stat-label">Üye</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number" id="statVenues">12</div>
+              <div class="stat-label">Anlaşmalı Mekan</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number" id="statDiscount">%30</div>
+              <div class="stat-label">e Varan İndirim</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== VENUES SECTION ========== -->
+  <section class="venues-section" id="venues">
+    <div class="container">
+      <h2 class="section-title">MYTh Kart Mekanları</h2>
+      <p class="section-subtitle">Anlaşmalı mekanlar arasında ara, filtrele ve keşfet!</p>
+
+      <!-- Weekly Deal Dynamic Container -->
+      <div class="weekly-deal">
+        <div class="reviews-header" style="margin-bottom: 16px;">
+          <div>
+            <h3>🔥 Haftanın Fırsatları</h3>
+            <p>Seçili mekanlarda MYTh üyelerine özel kaçırılmayacak fırsatlar!</p>
+          </div>
+        </div>
+        <div id="weeklyDealsContainer">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Reviews Section -->
+      <div class="reviews-section" id="reviewsSection">
+        <div class="reviews-header">
+          <div>
+            <h3>⭐ Son Yorumlar</h3>
+            <p>Üyelerimizin deneyimlerini okuyun veya kendi yorumunuzu ekleyin.</p>
+          </div>
+          <button class="btn btn-primary" id="openReviewBtn"><i class="fas fa-pen"></i> Yorum Yap</button>
+        </div>
+        <div class="reviews-list" id="reviewsList">
+          <!-- Populated by JS -->
+          <div class="no-results" style="padding: 20px;">Henüz yorum yapılmamış. İlk yorumu siz yapın!</div>
+        </div>
+      </div>
+
+      <!-- Filters Bar -->
+      <div class="filters-bar">
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" id="searchInput" placeholder="Mekan adı ara...">
+        </div>
+        <select class="filter-select" id="regionFilter">
+          <!-- Populated by JS -->
+        </select>
+        <select class="filter-select" id="sortFilter">
+          <!-- Populated by JS -->
+        </select>
+      </div>
+
+      <!-- Category Pills -->
+      <div class="category-pills" id="categoryPills">
+        <!-- Populated by JS -->
+      </div>
+
+      <!-- Venues Grid -->
+      <div class="venues-grid" id="venuesGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== MAP SECTION ========== -->
+  <section class="map-section" id="map">
+    <div class="container">
+      <h2 class="section-title">Harita Üzerinde Keşfet</h2>
+      <p class="section-subtitle">Konumunu paylaş, en yakın anlaşmalı mekanları keşfet ve yol tarifini al!</p>
+
+      <!-- Map Category Filters -->
+      <div class="map-filters" id="mapFilters">
+        <button class="map-filter-btn active" data-category="tumu">
+          <i class="fas fa-map-marker-alt"></i> Tümü
+        </button>
+        <button class="map-filter-btn" data-category="kafe">
+          ☕ En Yakın Kafe
+        </button>
+        <button class="map-filter-btn" data-category="restoran">
+          🍽️ En Yakın Restoran
+        </button>
+        <button class="map-filter-btn" data-category="oyun">
+          🎮 En Yakın Oyun
+        </button>
+        <button class="map-filter-btn" data-category="eglence">
+          🎉 En Yakın Eğlence
+        </button>
+      </div>
+
+      <!-- Nearest Venue Info Card -->
+      <div class="nearest-venue-card" id="nearestVenueCard" style="display:none;">
+        <div class="nearest-venue-info">
+          <span class="nearest-venue-emoji" id="nearestEmoji"></span>
+          <div>
+            <div class="nearest-venue-name" id="nearestName"></div>
+            <div class="nearest-venue-detail" id="nearestDetail"></div>
+          </div>
+        </div>
+        <a class="nearest-venue-directions" id="nearestDirections" href="#" target="_blank">
+          <i class="fas fa-diamond-turn-right"></i> Yol Tarifi
+        </a>
+      </div>
+
+      <div class="map-container-wrapper">
+        <div class="map-container">
+          <div id="leafletMap"></div>
+        </div>
+        <button class="map-locate-btn" id="locateBtn">
+          <i class="fas fa-location-crosshairs"></i> Konumumu Bul
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px; text-align: left;">
+        
+        <div class="footer-col" style="flex: 1; min-width: 250px;">
+          <div class="footer-logo" style="justify-content: flex-start; margin-bottom: 15px;">
+            <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo" class="footer-logo-img">
+            <span>MYTh Kart</span>
+          </div>
+          <p class="footer-text" style="margin-bottom: 15px;">Mühendislik ve Yöneticilik Topluluğu © 2026. Tüm hakları saklıdır.</p>
+          <div class="footer-links" style="justify-content: flex-start;">
+            <a href="https://www.instagram.com/myt.etu/" target="_blank" class="footer-link"><i class="fab fa-instagram"></i></a>
+            <a href="https://linkedin.com" target="_blank" class="footer-link"><i class="fab fa-linkedin"></i></a>
+            <a href="https://chat.whatsapp.com/GRsldpURG4GLo5LO4BXXwx" target="_blank" class="footer-link"><i class="fab fa-whatsapp"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-col" style="flex: 1; min-width: 250px;">
+          <h3 style="color: var(--text-primary); margin-bottom: 15px; font-size: 1.1rem;">Bize Ulaşın</h3>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 10px;">
+            <i class="fas fa-headset" style="color: var(--primary); margin-right: 5px;"></i> <strong>Destek Talebi:</strong> Bir sorununuz olduğu durumda WhatsApp grubundaki yöneticilerle iletişime geçebilirsiniz.
+          </p>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+            <i class="fas fa-store" style="color: var(--primary); margin-right: 5px;"></i> <strong>İşletme Kaydı:</strong> İşletmenizi sistemimize eklemek istiyorsanız <a href="https://www.instagram.com/myt.etu/" target="_blank" style="color: var(--primary); text-decoration: none;">Instagram hesabımız</a> üzerinden bizimle iletişime geçebilirsiniz.
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/auth.js?v=2"></script>
+  <script src="js/data.js?v=2"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/map.js"></script>
+  <script src="js/reviews.js?v=2"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>

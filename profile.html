@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MYTh Kart | Hesabım</title>
+  
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <link rel="stylesheet" href="css/admin.css?v=2">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="admin-body">
+
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header" style="cursor: pointer;" onclick="window.location.href='index.html'">
+        <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo" style="width: 50px;">
+        <h2><i class="fas fa-home"></i> Ana Sayfa</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-target="dashboard"><i class="fas fa-user"></i> Profilim</button>
+        <button class="nav-btn" data-target="myreviews"><i class="fas fa-comment-dots"></i> Yorumlarım</button>
+        <button class="nav-btn" data-target="favorites"><i class="fas fa-heart"></i> Favorilerim</button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="logoutBtn" class="btn btn-danger" style="width: 100%;"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <header class="admin-header">
+        <h1>Kullanıcı Paneli</h1>
+        <div class="admin-user-info">
+          <i class="fas fa-user-graduate"></i> <span id="profileNameDisplay">Öğrenci</span>
+        </div>
+      </header>
+
+      <div class="admin-content">
+        <!-- Dashboard Module -->
+        <section id="dashboard" class="admin-module active">
+          <h2>Hesap Bilgileriniz</h2>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <i class="fas fa-id-card"></i>
+              <div class="stat-info">
+                <h3>Üyelik Tipi</h3>
+                <p id="pUserType">Öğrenci</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-barcode"></i>
+              <div class="stat-info">
+                <h3>Kart Numarası</h3>
+                <p id="pCardNo">----</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-calendar-check"></i>
+              <div class="stat-info">
+                <h3>Kayıt Tarihi</h3>
+                <p id="pRegDate">----</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Gamification Badges Section -->
+          <div style="margin-top: 30px;">
+            <h3>Kazanılan Rozetler 🏆</h3>
+            <div id="badgesContainer" style="display: flex; gap: 15px; margin-top: 15px;">
+              <!-- JS populated -->
+            </div>
+          </div>
+
+          <!-- Digital Card Section -->
+          <div style="margin-top: 40px;">
+            <h3>Dijital Kartım 📱</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">İndirimlerden faydalanmak için bu QR kodu kasada gösterebilirsiniz.</p>
+            <div style="background: linear-gradient(135deg, var(--primary) 0%, #312e81 100%); padding: 30px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; max-width: 500px; box-shadow: var(--shadow-md);">
+              <div style="color: white;">
+                <h2 style="margin: 0 0 10px 0; color: white;">MYTh Kart</h2>
+                <div style="font-size: 1.2rem; margin-bottom: 5px;" id="dcName">Kullanıcı</div>
+                <div style="opacity: 0.8; font-size: 0.9rem;" id="dcType">Öğrenci</div>
+              </div>
+              <div style="background: white; padding: 10px; border-radius: var(--radius-md);">
+                <img id="qrCodeImg" src="" alt="QR Code" style="width: 120px; height: 120px; display: block;">
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 40px;">
+            <h3>Günün Fırsatları</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 15px;">MYTh Kart ayrıcalığıyla güncel fırsatları kaçırmayın!</p>
+            <div class="table-container">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Mekan</th>
+                    <th>Fırsat</th>
+                    <th>Açıklama</th>
+                    <th>Geçerlilik</th>
+                  </tr>
+                </thead>
+                <tbody id="pDealsTableBody">
+                  <!-- JS populated -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- Reviews Module -->
+        <section id="myreviews" class="admin-module">
+          <div class="module-header">
+            <h2>Yaptığım Yorumlar</h2>
+            <p style="color: var(--text-muted);">Gittiğiniz mekanlar için yaptığınız değerlendirmeler.</p>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Tarih</th>
+                  <th>Mekan</th>
+                  <th>Puan</th>
+                  <th>Yorum</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="pReviewsTableBody">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Favorites Module -->
+        <section id="favorites" class="admin-module">
+          <div class="module-header">
+            <h2>Favori Mekanlarım ❤️</h2>
+            <p style="color: var(--text-muted);">İlgilendiğiniz mekanlara kolayca ulaşın.</p>
+          </div>
+          <div class="table-container">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Mekan</th>
+                  <th>Kategori</th>
+                  <th>İndirim Oranı</th>
+                  <th>İşlem</th>
+                </tr>
+              </thead>
+              <tbody id="pFavoritesTableBody">
+                <!-- JS populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/data.js?v=3"></script>
+  <script src="js/profile.js?v=1"></script>
+</body>
+</html>
