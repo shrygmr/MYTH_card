@@ -177,6 +177,75 @@
     // Run on load
     initializeDatabase();
 
+    // Firebase Setup
+    try {
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjLc8L34Ok0s7Ml55iYjEHIy2-vLncl7E",
+            authDomain: "myth-card.firebaseapp.com",
+            projectId: "myth-card",
+            storageBucket: "myth-card.firebasestorage.app",
+            messagingSenderId: "207712470529",
+            appId: "1:207712470529:web:1b3c3696cb12c72e9ee200",
+            measurementId: "G-4K49RPKH1T"
+        };
+        
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        window.db = db;
+
+        // Override localStorage.setItem to sync to Firebase automatically
+        const originalSetItem = localStorage.setItem;
+        localStorage.setItem = function(key, value) {
+            originalSetItem.call(this, key, value);
+            // Don't sync session to cloud, only global data
+            if (key.startsWith('myth_') && key !== 'myth_active_session' && window.db) {
+                window.db.collection('myth_state').doc(key).set({ data: value }).catch(e => console.error("Firebase save error", e));
+            }
+        };
+
+        // Sync from Firebase on load
+        async function syncFromFirebase() {
+            try {
+                const snapshot = await db.collection('myth_state').get();
+                let changed = false;
+                
+                if (snapshot.empty) {
+                    // Seed Firebase with our initial default data
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith('myth_') && key !== 'myth_active_session') {
+                            db.collection('myth_state').doc(key).set({ data: localStorage.getItem(key) });
+                        }
+                    }
+                } else {
+                    snapshot.forEach(doc => {
+                        const serverValue = doc.data().data;
+                        const localValue = localStorage.getItem(doc.id);
+                        if (serverValue && serverValue !== localValue) {
+                            originalSetItem.call(localStorage, doc.id, serverValue);
+                            changed = true;
+                        }
+                    });
+                    
+                    if (changed) {
+                        // Re-bind global vars
+                        window.venues = JSON.parse(localStorage.getItem('myth_venues') || '[]');
+                        // Dispatch event to notify UI
+                        window.dispatchEvent(new Event('mythDBUpdated'));
+                    }
+                }
+            } catch (e) {
+                console.error("Firebase sync failed:", e);
+            }
+        }
+
+        syncFromFirebase();
+    } catch(e) {
+        console.warn("Firebase is not initialized or failed.", e);
+    }
+
     // Export public DB interface
     window.mythDB = {
         getVenues: () => JSON.parse(localStorage.getItem('myth_venues') || '[]'),

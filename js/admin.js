@@ -350,4 +350,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderDealsTable();
     renderReviewsTable();
     renderUsersTable();
+
+    // Firebase Sync Listener
+    window.addEventListener('mythDBUpdated', () => {
+        renderDashboard();
+        renderVenuesTable();
+        renderDealsTable();
+        renderReviewsTable();
+        renderUsersTable();
+    });
 });

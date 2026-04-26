@@ -137,4 +137,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Init
     renderDashboard();
     renderReviewsTable();
+
+    // Firebase Sync Listener
+    window.addEventListener('mythDBUpdated', () => {
+        renderDashboard();
+        renderReviewsTable();
+    });
 });
