@@ -13,17 +13,16 @@
 
     if (activeSession) {
       const session = JSON.parse(activeSession);
-      if (session.type === 'admin') {
-        window.location.href = 'admin.html';
-        return;
-      } else if (session.type === 'business') {
-        window.location.href = 'business.html';
-        return;
-      } else {
-        loginOverlay.classList.add('hidden');
-        document.body.style.overflow = 'auto';
-        if (navLoginBtn) {
-          navLoginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Hesabım';
+      loginOverlay.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+      
+      if (navLoginBtn) {
+        if (session.type === 'admin') {
+           navLoginBtn.innerHTML = '<i class="fas fa-user-shield"></i> Yönetim';
+        } else if (session.type === 'business') {
+           navLoginBtn.innerHTML = '<i class="fas fa-store"></i> İşletmem';
+        } else {
+           navLoginBtn.innerHTML = '<i class="fas fa-user-circle"></i> Hesabım';
         }
       }
     } else {
@@ -37,8 +36,10 @@
     if (navLoginBtn) {
       navLoginBtn.addEventListener('click', () => {
         if (activeSession) {
-          // It's a student or alumni (others are redirected)
-          window.location.href = 'profile.html';
+          const session = JSON.parse(activeSession);
+          if (session.type === 'admin') window.location.href = 'admin.html';
+          else if (session.type === 'business') window.location.href = 'business.html';
+          else window.location.href = 'profile.html';
         } else {
           loginOverlay.classList.remove('hidden');
           document.body.style.overflow = 'hidden';
