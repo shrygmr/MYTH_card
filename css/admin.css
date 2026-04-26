@@ -223,3 +223,48 @@
 
 .action-btn.edit:hover { color: var(--primary-light); }
 .action-btn.delete:hover { color: #EF4444; }
+
+/* Responsive (Mobile) */
+@media (max-width: 768px) {
+  .admin-body {
+    height: auto;
+    overflow: auto;
+  }
+  .admin-layout {
+    flex-direction: column;
+  }
+  .admin-sidebar {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 0;
+  }
+  .sidebar-header {
+    padding: 0 15px 10px;
+    margin-bottom: 10px;
+  }
+  .sidebar-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 5px;
+  }
+  .nav-btn {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  .admin-header {
+    padding: 0 15px;
+  }
+  .admin-content {
+    padding: 15px;
+  }
+  .table-container {
+    overflow-x: auto;
+  }
+  .module-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
