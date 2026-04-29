@@ -180,6 +180,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderVenues() {
+        if (window.isMythSyncing) {
+            venuesGrid.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 50px; color: var(--primary);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                    <p>Bulut verileri senkronize ediliyor...</p>
+                </div>
+            `;
+            return;
+        }
         const filtered = getFilteredVenues();
         const allReviews = window.mythDB ? window.mythDB.getReviews() : [];
         

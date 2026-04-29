@@ -3,102 +3,9 @@
 // =============================================
 
 (function() {
-    const DEFAULT_VENUES = [
-        {
-            id: 1,
-            name: "Tunalı Roasters",
-            category: "kafe",
-            region: "Çankaya",
-            address: "Tunalı Hilmi Cad. No:114, Çankaya/Ankara",
-            discount: 20,
-            description: "Üçüncü nesil kahve ve günlük taze tatlılar.",
-            image: "",
-            lat: 39.9015,
-            lng: 32.8615,
-            popular: true,
-            isNew: false,
-            phone: "0312 123 4567"
-        },
-        {
-            id: 2,
-            name: "Bahçeli Burger",
-            category: "restoran",
-            region: "Bahçelievler",
-            address: "7. Cadde No:45, Bahçelievler/Ankara",
-            discount: 15,
-            description: "El yapımı burger ve çıtır patates uzmanı.",
-            image: "",
-            lat: 39.9192,
-            lng: 32.8251,
-            popular: true,
-            isNew: false,
-            phone: "0312 234 5678"
-        },
-        {
-            id: 3,
-            name: "Kızılay Game & VR",
-            category: "oyun",
-            region: "Kızılay",
-            address: "Atatürk Bulvarı No:95, Kızılay/Ankara",
-            discount: 25,
-            description: "Ankara'nın en büyük VR ve PC oyun merkezi.",
-            image: "",
-            lat: 39.9208,
-            lng: 32.8541,
-            popular: false,
-            isNew: true,
-            phone: "0312 345 6789"
-        },
-        {
-            id: 4,
-            name: "Escape Ankara",
-            category: "eglence",
-            region: "Çankaya",
-            address: "Kavaklıdere Mah. Bestekar Cad. No:30, Çankaya",
-            discount: 30,
-            description: "Korku ve gizem temalı 4 farklı kaçış odası.",
-            image: "",
-            lat: 39.9070,
-            lng: 32.8570,
-            popular: true,
-            isNew: true,
-            phone: "0312 456 7890"
-        },
-        {
-            id: 5,
-            name: "Bilkent Station",
-            category: "kafe",
-            region: "Bilkent",
-            address: "Bilkent Center AVM, Bilkent/Ankara",
-            discount: 15,
-            description: "Kampüs içi sakin çalışma ve dinlenme alanı.",
-            image: "",
-            lat: 39.8765,
-            lng: 32.7485,
-            popular: false,
-            isNew: false,
-            phone: "0312 567 8901"
-        }
-    ];
+    const DEFAULT_VENUES = [];
 
-    const DEFAULT_DEALS = [
-        {
-            id: 1,
-            venueId: 1, // Tunalı Roasters
-            title: "Kahve Alana Kurabiye Bedava!",
-            description: "Hafta içi 10:00 - 14:00 arası herhangi bir filtre kahve alımında damla çikolatalı kurabiye hediye.",
-            validUntil: "2026-05-01",
-            type: "hediye"
-        },
-        {
-            id: 2,
-            venueId: 2, // Bahçeli Burger
-            title: "Öğrenci Menüsü Özel Fiyat",
-            description: "Cheeseburger + Büyük Boy Patates + İçecek sadece MYTh üyelerine %30 Ekstra İndirimli!",
-            validUntil: "2026-04-30",
-            type: "indirim"
-        }
-    ];
+    const DEFAULT_DEALS = [];
 
     // Auth seeds
     const DEFAULT_ADMINS = {
@@ -194,13 +101,16 @@
         }
         const db = firebase.firestore();
         window.db = db;
+        window.isMythSyncing = true;
+
 
         // Override localStorage.setItem to sync to Firebase automatically
         const originalSetItem = localStorage.setItem;
         localStorage.setItem = function(key, value) {
             originalSetItem.call(this, key, value);
             // Don't sync session to cloud, only global data
-            if (key.startsWith('myth_') && key !== 'myth_active_session' && window.db) {
+            // Also don't sync if we are currently performing the initial fetch from cloud
+            if (key.startsWith('myth_') && key !== 'myth_active_session' && window.db && !window.isMythSyncing) {
                 window.db.collection('myth_state').doc(key).set({ data: value }).catch(e => console.error("Firebase save error", e));
             }
         };
@@ -241,7 +151,10 @@
             }
         }
 
-        syncFromFirebase();
+        syncFromFirebase().finally(() => {
+            window.isMythSyncing = false;
+        });
+
     } catch(e) {
         console.warn("Firebase is not initialized or failed.", e);
     }

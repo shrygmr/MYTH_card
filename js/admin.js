@@ -59,9 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const deals = window.mythDB.getDeals();
         const reviews = window.mythDB.getReviews();
 
-        document.getElementById('statVenuesCount').textContent = venues.length;
-        document.getElementById('statDealsCount').textContent = deals.length;
-        document.getElementById('statReviewsCount').textContent = reviews.length;
+        document.getElementById('statVenuesCount').textContent = window.isMythSyncing ? '...' : venues.length;
+        document.getElementById('statDealsCount').textContent = window.isMythSyncing ? '...' : deals.length;
+        document.getElementById('statReviewsCount').textContent = window.isMythSyncing ? '...' : reviews.length;
     }
 
     // ---------------------------------------------
@@ -74,6 +74,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderVenuesTable() {
         const venues = window.mythDB.getVenues();
         const tbody = document.getElementById('venuesTableBody');
+        
+        if (window.isMythSyncing) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Bulut verileri senkronize ediliyor...</td></tr>';
+            return;
+        }
+
         tbody.innerHTML = venues.map(v => `
             <tr>
                 <td>#${v.id}</td>
