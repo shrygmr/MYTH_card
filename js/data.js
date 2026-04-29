@@ -45,18 +45,32 @@
     };
 
     // ---- Public mythDB API ----
+    // saveToCloud: writes to both localStorage AND Firebase, returns a Promise
+    // Admin/business must await this before closing modals so data survives page refresh
     window.mythDB = {
         getVenues:  () => JSON.parse(localStorage.getItem('myth_venues')  || '[]'),
-        saveVenues: (d) => localStorage.setItem('myth_venues',  JSON.stringify(d)),
-
         getDeals:   () => JSON.parse(localStorage.getItem('myth_deals')   || '[]'),
-        saveDeals:  (d) => localStorage.setItem('myth_deals',   JSON.stringify(d)),
-
         getReviews: () => JSON.parse(localStorage.getItem('myth_reviews') || '[]'),
-        saveReviews:(d) => localStorage.setItem('myth_reviews', JSON.stringify(d)),
+        getAvailablePins: () => JSON.parse(localStorage.getItem('myth_available_pins') || '[]'),
 
-        getAvailablePins:  () => JSON.parse(localStorage.getItem('myth_available_pins') || '[]'),
-        saveAvailablePins: (d) => localStorage.setItem('myth_available_pins', JSON.stringify(d)),
+        // saveToCloud(key, data) — guaranteed write to Firebase, awaitable
+        saveToCloud: function(key, data) {
+            const value = JSON.stringify(data);
+            localStorage.setItem(key, value); // local always first
+            if (window.db) {
+                return window.db.collection('myth_state').doc(key)
+                    .set({ data: value })
+                    .catch(e => console.error('[MYTh] Firebase write error:', key, e));
+            }
+            return Promise.resolve();
+        },
+
+        // Convenience wrappers — these return Promises
+        saveVenues:       (d) => window.mythDB.saveToCloud('myth_venues', d),
+        saveDeals:        (d) => window.mythDB.saveToCloud('myth_deals', d),
+        saveReviews:      (d) => window.mythDB.saveToCloud('myth_reviews', d),
+        saveAvailablePins:(d) => window.mythDB.saveToCloud('myth_available_pins', d),
+        saveUsers:        (d) => window.mythDB.saveToCloud('myth_users', d),
 
         getCategories:   () => CATEGORIES,
         getRegions:      () => REGIONS,

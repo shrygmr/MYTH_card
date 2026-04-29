@@ -136,7 +136,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     venueForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        whenDBReady(() => {
+        whenDBReady(async () => {
+            const submitBtn = venueForm.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Kaydediliyor...';
+            submitBtn.disabled = true;
+
             const venues = window.mythDB.getVenues();
             
             const venueData = {
@@ -164,7 +168,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 venues.push(venueData);
             }
 
-            window.mythDB.saveVenues(venues);
+            // AWAIT the Firebase write — modal stays open until data is confirmed saved
+            await window.mythDB.saveVenues(venues);
+
+            submitBtn.textContent = 'Kaydet';
+            submitBtn.disabled = false;
             venueModal.classList.add('hidden');
             renderVenuesTable();
             renderDashboard();
@@ -242,9 +250,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dealForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        whenDBReady(() => {
+        whenDBReady(async () => {
+            const submitBtn = dealForm.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Kaydediliyor...';
+            submitBtn.disabled = true;
+
             const deals = window.mythDB.getDeals();
-            
             const dealData = {
                 id: isEditingDeal ? parseInt(document.getElementById('dId').value) : Date.now(),
                 venueId: parseInt(document.getElementById('dVenueId').value),
@@ -261,7 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 deals.push(dealData);
             }
 
-            window.mythDB.saveDeals(deals);
+            await window.mythDB.saveDeals(deals);
+
+            submitBtn.textContent = 'Kaydet';
+            submitBtn.disabled = false;
             dealModal.classList.add('hidden');
             renderDealsTable();
             renderDashboard();
