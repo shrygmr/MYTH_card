@@ -291,6 +291,16 @@
             return;
         }
 
+        if (!window.isSecureContext) {
+            console.error('Geolocation requires a secure context (HTTPS).');
+            btn.innerHTML = '<i class="fas fa-lock"></i> HTTPS Gerekli';
+            alert("Konum özelliğini kullanabilmek için sitenin güvenli (HTTPS) bağlantı üzerinden açılması gerekmektedir. Lütfen GitHub ayarlarından 'Enforce HTTPS' seçeneğini aktif edin.");
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> Konumumu Bul';
+            }, 3000);
+            return;
+        }
+
         navigator.geolocation.getCurrentPosition(
             (position) => {
                 const { latitude, longitude } = position.coords;
@@ -338,7 +348,12 @@
             },
             (error) => {
                 console.error('Geolocation error:', error);
-                btn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Konum alınamadı';
+                let errorMsg = 'Konum alınamadı';
+                if (error.code === error.PERMISSION_DENIED) {
+                    errorMsg = 'İzin reddedildi';
+                    alert("Konum izni reddedildi. Lütfen tarayıcı ayarlarından konuma izin verin.");
+                }
+                btn.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${errorMsg}`;
                 setTimeout(() => {
                     btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> Konumumu Bul';
                 }, 2000);
