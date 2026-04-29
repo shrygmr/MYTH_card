@@ -33,6 +33,21 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
     });
 
+    // Wait for Firebase sync before any DB operations
+    function whenDBReady(cb) {
+        if (!window.isMythSyncing) { cb(); }
+        else { window.addEventListener('mythDBReady', cb, { once: true }); }
+    }
+
+    // Re-render all tables once Firebase data arrives
+    window.addEventListener('mythDBReady', () => {
+        renderDashboard();
+        renderVenuesTable();
+        renderDealsTable();
+        renderReviewsTable();
+        if (isSuperAdmin) renderUsersTable();
+    });
+
     // Sidebar Navigation
     const navBtns = document.querySelectorAll('.nav-btn');
     const modules = document.querySelectorAll('.admin-module');
@@ -121,38 +136,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     venueForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const venues = window.mythDB.getVenues();
-        
-        const venueData = {
-            id: isEditingVenue ? parseInt(document.getElementById('vId').value) : Date.now(),
-            name: document.getElementById('vName').value,
-            category: document.getElementById('vCategory').value,
-            region: document.getElementById('vRegion').value,
-            discount: parseInt(document.getElementById('vDiscount').value),
-            lat: parseFloat(document.getElementById('vLat').value),
-            lng: parseFloat(document.getElementById('vLng').value),
-            address: document.getElementById('vAddress').value,
-            description: document.getElementById('vDesc').value,
-            popular: false,
-            isNew: !isEditingVenue
-        };
+        whenDBReady(() => {
+            const venues = window.mythDB.getVenues();
+            
+            const venueData = {
+                id: isEditingVenue ? parseInt(document.getElementById('vId').value) : Date.now(),
+                name: document.getElementById('vName').value,
+                category: document.getElementById('vCategory').value,
+                region: document.getElementById('vRegion').value,
+                discount: parseInt(document.getElementById('vDiscount').value),
+                lat: parseFloat(document.getElementById('vLat').value),
+                lng: parseFloat(document.getElementById('vLng').value),
+                address: document.getElementById('vAddress').value,
+                description: document.getElementById('vDesc').value,
+                popular: false,
+                isNew: !isEditingVenue
+            };
 
-        if (isEditingVenue) {
-            const index = venues.findIndex(v => v.id === venueData.id);
-            if (index !== -1) {
-                // Preserve popular/isNew
-                venueData.popular = venues[index].popular;
-                venueData.isNew = venues[index].isNew;
-                venues[index] = venueData;
+            if (isEditingVenue) {
+                const index = venues.findIndex(v => v.id === venueData.id);
+                if (index !== -1) {
+                    venueData.popular = venues[index].popular;
+                    venueData.isNew = venues[index].isNew;
+                    venues[index] = venueData;
+                }
+            } else {
+                venues.push(venueData);
             }
-        } else {
-            venues.push(venueData);
-        }
 
-        window.mythDB.saveVenues(venues);
-        venueModal.classList.add('hidden');
-        renderVenuesTable();
-        renderDashboard();
+            window.mythDB.saveVenues(venues);
+            venueModal.classList.add('hidden');
+            renderVenuesTable();
+            renderDashboard();
+        });
     });
 
     window.editVenue = function(id) {
@@ -226,28 +242,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dealForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const deals = window.mythDB.getDeals();
-        
-        const dealData = {
-            id: isEditingDeal ? parseInt(document.getElementById('dId').value) : Date.now(),
-            venueId: parseInt(document.getElementById('dVenueId').value),
-            title: document.getElementById('dTitle').value,
-            type: document.getElementById('dType').value,
-            validUntil: document.getElementById('dValidUntil').value,
-            description: document.getElementById('dDesc').value
-        };
+        whenDBReady(() => {
+            const deals = window.mythDB.getDeals();
+            
+            const dealData = {
+                id: isEditingDeal ? parseInt(document.getElementById('dId').value) : Date.now(),
+                venueId: parseInt(document.getElementById('dVenueId').value),
+                title: document.getElementById('dTitle').value,
+                type: document.getElementById('dType').value,
+                validUntil: document.getElementById('dValidUntil').value,
+                description: document.getElementById('dDesc').value
+            };
 
-        if (isEditingDeal) {
-            const index = deals.findIndex(d => d.id === dealData.id);
-            if (index !== -1) deals[index] = dealData;
-        } else {
-            deals.push(dealData);
-        }
+            if (isEditingDeal) {
+                const index = deals.findIndex(d => d.id === dealData.id);
+                if (index !== -1) deals[index] = dealData;
+            } else {
+                deals.push(dealData);
+            }
 
-        window.mythDB.saveDeals(deals);
-        dealModal.classList.add('hidden');
-        renderDealsTable();
-        renderDashboard();
+            window.mythDB.saveDeals(deals);
+            dealModal.classList.add('hidden');
+            renderDealsTable();
+            renderDashboard();
+        });
     });
 
     window.editDeal = function(id) {
