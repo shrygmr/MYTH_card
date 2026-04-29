@@ -159,8 +159,8 @@
       studentForm.addEventListener('submit', (e) => {
         e.preventDefault();
         whenDBReady(() => {
-          const studentId = studentIdInput.value.trim();
-          const pass = studentPassInput.value.trim();
+          const studentId = studentIdInput.value.trim().toUpperCase();
+          const pass = studentPassInput.value.trim().toUpperCase();
           const users = getUsers();
 
           if (users.students[studentId]) {
