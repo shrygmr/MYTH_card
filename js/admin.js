@@ -21,6 +21,12 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('adminNameDisplay').textContent = admins[session.identifier].name;
     }
 
+    // Only sahra.admin can see the Users tab
+    const isSuperAdmin = session.identifier === 'sahra.admin';
+    if (isSuperAdmin) {
+        document.getElementById('navUsersBtn').style.display = 'flex';
+    }
+
     // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
         localStorage.removeItem('myth_active_session');
@@ -47,7 +53,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (target === 'venues') renderVenuesTable();
             if (target === 'deals') renderDealsTable();
             if (target === 'reviews') renderReviewsTable();
-            if (target === 'users') renderUsersTable();
+            if (target === 'users') {
+                if (isSuperAdmin) renderUsersTable();
+                else { window.location.href = 'admin.html'; }
+            }
         });
     });
 
