@@ -32,7 +32,7 @@
 
     // ---- Admin & Business credentials (Only seeded if Firebase is empty) ----
     const DEFAULT_ADMINS = {
-        "sahra.admin": { password: "MythAdmin2026!01", name: "Sahra" },
+        "sahra.admin": { password: "sahra0267", name: "Sahra" },
         "batu.admin": { password: "MythAdmin2026!02", name: "Batu" },
         "zersah.admin": { password: "MythAdmin2026!03", name: "Zerşah" },
         "ece.admin": { password: "MythAdmin2026!04", name: "Ece" },
