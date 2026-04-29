@@ -134,6 +134,7 @@
         } else {
           // Not Registered
           studentHelpText.style.display = 'block';
+          studentHelpText.textContent = "Yeni kayıt için kartınızdaki şifreyi girin (Örn: 4567-03)";
           studentSubmitBtn.textContent = 'Kayıt Ol ve Giriş Yap';
         }
       });
@@ -157,19 +158,27 @@
           }
         } else {
           // New user registration
-          if (pass.length !== 6 || isNaN(pass)) {
-            alert("Lütfen MYTh kartınızın üzerindeki 6 haneli numarayı girin.");
+          // Validate Format: XXXX-XX (Alphanumeric)
+          const pinRegex = /^[A-Z0-9]{4}-[A-Z0-9]{2}$/;
+          if (!pinRegex.test(pass)) {
+            alert("Lütfen kartınızın üzerindeki geçerli şifreyi girin (Örn: 4567-03).");
             return;
           }
           
-          // Check if this PIN is already used by another student
-          const isPinUsed = Object.values(users.students).some(s => s.password === pass);
-          if (isPinUsed) {
-            alert("Bu kart numarası zaten başka bir öğrenci tarafından kullanılıyor.");
+          const availablePins = window.mythDB.getAvailablePins();
+          const pinIndex = availablePins.indexOf(pass);
+
+          if (pinIndex === -1) {
+            alert("Bu şifre geçersiz veya zaten başka bir öğrenci tarafından kullanılmış.");
             return;
           }
 
+          // Assign PIN to student and remove from available pool
           users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
+          
+          const newAvailablePins = availablePins.filter(p => p !== pass);
+          window.mythDB.saveAvailablePins(newAvailablePins);
+          
           saveUsers(users);
           loginUser('student', studentId);
         }

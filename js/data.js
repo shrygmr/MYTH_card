@@ -162,6 +162,9 @@
         getReviews: () => JSON.parse(localStorage.getItem('myth_reviews') || '[]'),
         saveReviews: (data) => localStorage.setItem('myth_reviews', JSON.stringify(data)),
         
+        getAvailablePins: () => JSON.parse(localStorage.getItem('myth_available_pins') || '[]'),
+        saveAvailablePins: (data) => localStorage.setItem('myth_available_pins', JSON.stringify(data)),
+        
         getCategories: () => CATEGORIES,
         getRegions: () => REGIONS,
         getSortOptions: () => SORT_OPTIONS
