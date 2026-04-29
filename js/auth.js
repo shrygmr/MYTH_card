@@ -140,6 +140,10 @@
 
       studentForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (window.isMythSyncing) {
+          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
+          return;
+        }
         const studentId = studentIdInput.value.trim();
         const pass = studentPassInput.value.trim();
         const users = getUsers();
@@ -201,6 +205,10 @@
 
       alumniForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (window.isMythSyncing) {
+          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
+          return;
+        }
         const phone = alumniPhoneInput.value.trim();
         const pass = alumniPassInput.value.trim();
         const users = getUsers();
@@ -229,6 +237,10 @@
     if(businessForm) {
       businessForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (window.isMythSyncing) {
+          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
+          return;
+        }
         const businessId = document.getElementById('businessId').value.trim();
         const pass = document.getElementById('businessPass').value.trim();
         
@@ -245,6 +257,10 @@
     if(adminForm) {
       adminForm.addEventListener('submit', (e) => {
         e.preventDefault();
+        if (window.isMythSyncing) {
+          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
+          return;
+        }
         const adminId = document.getElementById('adminId').value.trim();
         const pass = document.getElementById('adminPass').value.trim();
         
