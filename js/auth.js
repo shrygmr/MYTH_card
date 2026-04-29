@@ -85,13 +85,25 @@
     });
 
     // Database Mock using localStorage
+    // These always read AFTER Firebase sync is done (isMythSyncing=false)
     function getUsers() {
       const usersStr = localStorage.getItem('myth_users');
       return usersStr ? JSON.parse(usersStr) : { students: {}, alumni: {} };
     }
 
     function saveUsers(users) {
+      // This goes through the overridden localStorage.setItem which auto-syncs to Firebase
       localStorage.setItem('myth_users', JSON.stringify(users));
+    }
+
+    // Wait for Firebase sync to complete before allowing any auth action
+    // If already done, resolves immediately
+    function whenDBReady(callback) {
+      if (!window.isMythSyncing) {
+        callback();
+      } else {
+        window.addEventListener('mythDBReady', callback, { once: true });
+      }
     }
 
     function loginUser(type, identifier, venueId = null) {
@@ -141,47 +153,34 @@
 
       studentForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (window.isMythSyncing) {
-          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
-          return;
-        }
-        const studentId = studentIdInput.value.trim();
-        const pass = studentPassInput.value.trim();
-        const users = getUsers();
+        whenDBReady(() => {
+          const studentId = studentIdInput.value.trim();
+          const pass = studentPassInput.value.trim();
+          const users = getUsers();
 
-        if (users.students[studentId]) {
-          // Existing user login
-          if (users.students[studentId].password === pass) {
-            loginUser('student', studentId);
+          if (users.students[studentId]) {
+            if (users.students[studentId].password === pass) {
+              loginUser('student', studentId);
+            } else {
+              alert("Hatalı şifre. Lütfen kart numaranı kontrol edin.");
+            }
           } else {
-            alert("Hatalı şifre. Lütfen kart numaranızı kontrol edin.");
+            const pinRegex = /^[A-Z0-9]{4}-[A-Z0-9]{2}$/;
+            if (!pinRegex.test(pass)) {
+              alert("Lütfen kartınızın üzerindeki geçerli şifreyi girin (Örn: 4567-03).");
+              return;
+            }
+            const availablePins = window.mythDB.getAvailablePins();
+            if (availablePins.indexOf(pass) === -1) {
+              alert("Bu şifre geçersiz veya zaten başka bir öğrenci tarafından kullanılmış.");
+              return;
+            }
+            users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
+            window.mythDB.saveAvailablePins(availablePins.filter(p => p !== pass));
+            saveUsers(users);
+            loginUser('student', studentId);
           }
-        } else {
-          // New user registration
-          // Validate Format: XXXX-XX (Alphanumeric)
-          const pinRegex = /^[A-Z0-9]{4}-[A-Z0-9]{2}$/;
-          if (!pinRegex.test(pass)) {
-            alert("Lütfen kartınızın üzerindeki geçerli şifreyi girin (Örn: 4567-03).");
-            return;
-          }
-          
-          const availablePins = window.mythDB.getAvailablePins();
-          const pinIndex = availablePins.indexOf(pass);
-
-          if (pinIndex === -1) {
-            alert("Bu şifre geçersiz veya zaten başka bir öğrenci tarafından kullanılmış.");
-            return;
-          }
-
-          // Assign PIN to student and remove from available pool
-          users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
-          
-          const newAvailablePins = availablePins.filter(p => p !== pass);
-          window.mythDB.saveAvailablePins(newAvailablePins);
-          
-          saveUsers(users);
-          loginUser('student', studentId);
-        }
+        });
       });
     }
 
@@ -214,31 +213,27 @@
 
       alumniForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (window.isMythSyncing) {
-          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
-          return;
-        }
-        const phone = alumniPhoneInput.value.trim();
-        const pass = alumniPassInput.value.trim();
-        const users = getUsers();
+        whenDBReady(() => {
+          const phone = alumniPhoneInput.value.trim();
+          const pass = alumniPassInput.value.trim();
+          const users = getUsers();
 
-        if (users.alumni[phone]) {
-          // Existing user login
-          if (users.alumni[phone].password === pass) {
-            loginUser('alumni', phone);
+          if (users.alumni[phone]) {
+            if (users.alumni[phone].password === pass) {
+              loginUser('alumni', phone);
+            } else {
+              alert("Hatalı şifre.");
+            }
           } else {
-            alert("Hatalı şifre.");
+            if (pass.length < 4) {
+              alert("Şifreniz en az 4 haneli olmalıdır.");
+              return;
+            }
+            users.alumni[phone] = { password: pass, registeredAt: new Date().toISOString() };
+            saveUsers(users);
+            loginUser('alumni', phone);
           }
-        } else {
-          // New user registration
-          if(pass.length < 4) {
-            alert("Şifreniz en az 4 haneli olmalıdır.");
-            return;
-          }
-          users.alumni[phone] = { password: pass, registeredAt: new Date().toISOString() };
-          saveUsers(users);
-          loginUser('alumni', phone);
-        }
+        });
       });
     }
 
@@ -246,19 +241,16 @@
     if(businessForm) {
       businessForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (window.isMythSyncing) {
-          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
-          return;
-        }
-        const businessId = document.getElementById('businessId').value.trim();
-        const pass = document.getElementById('businessPass').value.trim();
-        
-        const businesses = JSON.parse(localStorage.getItem('myth_businesses') || '{}');
-        if (businesses[businessId] && businesses[businessId].password === pass) {
-          loginUser('business', businessId, businesses[businessId].venueId);
-        } else {
-          alert('Hatalı İşletme Kullanıcı Adı veya Şifre.');
-        }
+        whenDBReady(() => {
+          const businessId = document.getElementById('businessId').value.trim();
+          const pass = document.getElementById('businessPass').value.trim();
+          const businesses = JSON.parse(localStorage.getItem('myth_businesses') || '{}');
+          if (businesses[businessId] && businesses[businessId].password === pass) {
+            loginUser('business', businessId, businesses[businessId].venueId);
+          } else {
+            alert('Hatalı İşletme Kullanıcı Adı veya Şifre.');
+          }
+        });
       });
     }
 
@@ -266,19 +258,16 @@
     if(adminForm) {
       adminForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        if (window.isMythSyncing) {
-          alert("Bulut verileri senkronize ediliyor, lütfen bir saniye bekleyin...");
-          return;
-        }
-        const adminId = document.getElementById('adminId').value.trim();
-        const pass = document.getElementById('adminPass').value.trim();
-        
-        const admins = JSON.parse(localStorage.getItem('myth_admins') || '{}');
-        if (admins[adminId] && admins[adminId].password === pass) {
-          loginUser('admin', adminId);
-        } else {
-          alert('Hatalı Yetkili Kullanıcı Adı veya Şifre.');
-        }
+        whenDBReady(() => {
+          const adminId = document.getElementById('adminId').value.trim();
+          const pass = document.getElementById('adminPass').value.trim();
+          const admins = JSON.parse(localStorage.getItem('myth_admins') || '{}');
+          if (admins[adminId] && admins[adminId].password === pass) {
+            loginUser('admin', adminId);
+          } else {
+            alert('Hatalı Yetkili Kullanıcı Adı veya Şifre.');
+          }
+        });
       });
     }
 
