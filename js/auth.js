@@ -111,6 +111,11 @@
       if (venueId) sessionObj.venueId = venueId;
       
       localStorage.setItem('myth_active_session', JSON.stringify(sessionObj));
+
+      // Log event to Analytics
+      if (window.analytics) {
+        window.analytics.logEvent('login', { method: type, user_id: identifier });
+      }
       
       if (type === 'admin') {
         window.location.href = 'admin.html';

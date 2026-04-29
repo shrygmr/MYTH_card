@@ -104,6 +104,12 @@
         const db = firebase.firestore();
         window.db = db;
 
+        // Initialize Analytics
+        if (typeof firebase.analytics === 'function') {
+            window.analytics = firebase.analytics();
+            console.log('[MYTh] Analytics initialized');
+        }
+
         // Keys that should NEVER be pushed from local to cloud
         const CLOUD_SKIP_KEYS = new Set(['myth_active_session', 'myth-theme']);
 
