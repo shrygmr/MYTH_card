@@ -91,9 +91,9 @@
       return usersStr ? JSON.parse(usersStr) : { students: {}, alumni: {} };
     }
 
-    function saveUsers(users) {
-      // This goes through the overridden localStorage.setItem which auto-syncs to Firebase
-      localStorage.setItem('myth_users', JSON.stringify(users));
+    async function saveUsers(users) {
+      // Direct Firebase write via mythDB — guaranteed to persist
+      await window.mythDB.saveUsers(users);
     }
 
     // Wait for Firebase sync to complete before allowing any auth action
@@ -158,18 +158,20 @@
 
       studentForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        whenDBReady(() => {
+        whenDBReady(async () => {
           const studentId = studentIdInput.value.trim().toUpperCase();
           const pass = studentPassInput.value.trim().toUpperCase();
           const users = getUsers();
 
           if (users.students[studentId]) {
+            // Existing student — login
             if (users.students[studentId].password === pass) {
               loginUser('student', studentId);
             } else {
               alert("Hatalı şifre. Lütfen kart numaranı kontrol edin.");
             }
           } else {
+            // New student registration
             const pinRegex = /^[A-Z0-9]{4}-[A-Z0-9]{2}$/;
             if (!pinRegex.test(pass)) {
               alert("Lütfen kartınızın üzerindeki geçerli şifreyi girin (Örn: 4567-03).");
@@ -180,9 +182,14 @@
               alert("Bu şifre geçersiz veya zaten başka bir öğrenci tarafından kullanılmış.");
               return;
             }
+            studentSubmitBtn.textContent = 'Kaydediliyor...';
+            studentSubmitBtn.disabled = true;
             users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
-            window.mythDB.saveAvailablePins(availablePins.filter(p => p !== pass));
-            saveUsers(users);
+            // Await both saves before login so data is in Firebase before redirect
+            await Promise.all([
+              saveUsers(users),
+              window.mythDB.saveAvailablePins(availablePins.filter(p => p !== pass))
+            ]);
             loginUser('student', studentId);
           }
         });
@@ -218,7 +225,7 @@
 
       alumniForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        whenDBReady(() => {
+        whenDBReady(async () => {
           const phone = alumniPhoneInput.value.trim();
           const pass = alumniPassInput.value.trim();
           const users = getUsers();
@@ -234,8 +241,10 @@
               alert("Şifreniz en az 4 haneli olmalıdır.");
               return;
             }
+            alumniSubmitBtn.textContent = 'Kaydediliyor...';
+            alumniSubmitBtn.disabled = true;
             users.alumni[phone] = { password: pass, registeredAt: new Date().toISOString() };
-            saveUsers(users);
+            await saveUsers(users);
             loginUser('alumni', phone);
           }
         });

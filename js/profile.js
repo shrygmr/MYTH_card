@@ -23,17 +23,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const isStudent = session.type === 'student';
     document.getElementById('pUserType').textContent = isStudent ? 'Öğrenci' : 'Mezun';
 
-    const users = JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
-    const userGroup = isStudent ? users.students : users.alumni;
-    const userData = userGroup[identifier];
+    function loadProfileData() {
+        const users = JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
+        const userGroup = isStudent ? users.students : users.alumni;
+        const userData = userGroup[identifier];
 
-    if (userData) {
-        document.getElementById('pCardNo').textContent = userData.cardNo || 'Bilinmiyor';
-        
-        if (userData.registeredAt) {
-            const d = new Date(userData.registeredAt);
-            document.getElementById('pRegDate').textContent = d.toLocaleDateString('tr-TR');
+        if (userData) {
+            document.getElementById('pCardNo').textContent = userData.password || 'Bilinmiyor';
+            
+            if (userData.registeredAt) {
+                const d = new Date(userData.registeredAt);
+                document.getElementById('pRegDate').textContent = d.toLocaleDateString('tr-TR', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                });
+            } else {
+                document.getElementById('pRegDate').textContent = 'Bilinmiyor';
+            }
         }
+    }
+
+    // Load after Firebase sync
+    if (!window.isMythSyncing) {
+        loadProfileData();
+    } else {
+        window.addEventListener('mythDBReady', loadProfileData, { once: true });
     }
 
     // Logout
