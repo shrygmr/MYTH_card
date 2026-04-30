@@ -231,7 +231,10 @@
 
         <div class="about-visual">
           <div class="about-card-real">
-            <img src="assets/images/myth_card_real.png" alt="MYTh Kart Real" style="width: 100%; border-radius: var(--radius-md); box-shadow: var(--shadow-xl); transform: perspective(1000px) rotateY(-5deg) rotateX(5deg); transition: transform 0.5s ease;">
+            <img src="assets/images/myth_card_real.png" 
+                 alt="MYTh Kart" 
+                 onerror="this.src='assets/images/logo_bg_removed.png'; this.style.padding='40px'; this.style.background='var(--primary)';"
+                 style="width: 100%; height: auto; display: block; border-radius: var(--radius-md); box-shadow: var(--shadow-xl); transform: perspective(1000px) rotateY(-5deg) rotateX(5deg); transition: transform 0.5s ease;">
           </div>
           <div class="about-stats">
             <div class="stat-item">
@@ -262,7 +265,7 @@
       <div class="weekly-deal">
         <div class="reviews-header" style="margin-bottom: 16px;">
           <div>
-            <h3>🔥 Haftanın Fırsatları</h3>
+            <h3><i class="fas fa-fire" style="color: #F59E0B;"></i> Haftanın Fırsatları</h3>
             <p>Seçili mekanlarda MYTh üyelerine özel kaçırılmayacak fırsatlar!</p>
           </div>
         </div>
@@ -275,7 +278,7 @@
       <div class="reviews-section" id="reviewsSection">
         <div class="reviews-header">
           <div>
-            <h3>⭐ Son Yorumlar</h3>
+            <h3><i class="fas fa-star" style="color: var(--accent);"></i> Son Yorumlar</h3>
             <p>Üyelerimizin deneyimlerini okuyun veya kendi yorumunuzu ekleyin.</p>
           </div>
           <button class="btn btn-primary" id="openReviewBtn"><i class="fas fa-pen"></i> Yorum Yap</button>
@@ -365,42 +368,71 @@
   <!-- ========== FOOTER ========== -->
   <footer class="footer">
     <div class="container">
-      <div class="footer-content" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 30px; text-align: left;">
-        
-        <div class="footer-col" style="flex: 1; min-width: 250px;">
-          <div class="footer-logo" style="justify-content: flex-start; margin-bottom: 15px;">
-            <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo" class="footer-logo-img">
-            <span>MYTh Kart</span>
+      <div class="footer-grid">
+        <!-- Brand Col -->
+        <div class="footer-col footer-about">
+          <div class="footer-logo">
+            <img src="assets/images/logo_bg_removed.png" alt="MYTh Logo">
+            <span>MYTh</span>
           </div>
-          <p class="footer-text" style="margin-bottom: 15px;">Mühendislik ve Yöneticilik Topluluğu © 2026. Tüm hakları saklıdır.</p>
-          <div class="footer-links" style="justify-content: flex-start;">
-            <a href="https://www.instagram.com/myt.etu/" target="_blank" class="footer-link"><i class="fab fa-instagram"></i></a>
-            <a href="https://linkedin.com" target="_blank" class="footer-link"><i class="fab fa-linkedin"></i></a>
-            <a href="https://chat.whatsapp.com/GRsldpURG4GLo5LO4BXXwx" target="_blank" class="footer-link"><i class="fab fa-whatsapp"></i></a>
-          </div>
-        </div>
-
-        <div class="footer-col" style="flex: 1; min-width: 250px;">
-          <h3 style="color: var(--text-primary); margin-bottom: 15px; font-size: 1.1rem;">Bize Ulaşın</h3>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; margin-bottom: 10px;">
-            <i class="fas fa-headset" style="color: var(--primary); margin-right: 5px;"></i> <strong>Destek Talebi:</strong> Bir sorununuz olduğu durumda WhatsApp grubundaki yöneticilerle iletişime geçebilirsiniz.
-          </p>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
-            <i class="fas fa-store" style="color: var(--primary); margin-right: 5px;"></i> <strong>İşletme Kaydı:</strong> İşletmenizi sistemimize eklemek istiyorsanız <a href="https://www.instagram.com/myt.etu/" target="_blank" style="color: var(--primary); text-decoration: none;">Instagram hesabımız</a> üzerinden bizimle iletişime geçebilirsiniz.
+          <p>
+            Mühendislik ve Yöneticilik Topluluğu olarak, öğrencilerimize sosyal ve ekonomik ayrıcalıklar sunmaya devam ediyoruz.
           </p>
         </div>
 
+        <!-- Links Col -->
+        <div class="footer-col">
+          <h3>Hızlı Linkler</h3>
+          <ul class="footer-links-list">
+            <li><a href="#hero">Ana Sayfa</a></li>
+            <li><a href="#about">Biz Kimiz?</a></li>
+            <li><a href="#venues">Anlaşmalı Mekanlar</a></li>
+            <li><a href="#map">Harita Üzerinde Gör</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact Col -->
+        <div class="footer-col">
+          <h3>İletişim & Destek</h3>
+          <div class="footer-contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>iletisim@mythkart.com</span>
+          </div>
+          <div class="footer-contact-item">
+            <i class="fas fa-location-dot"></i>
+            <span>TOBB ETÜ Öğrenci Konseyi Ofisi</span>
+          </div>
+        </div>
+
+        <!-- Social Col -->
+        <div class="footer-col">
+          <h3>Bizi Takip Edin</h3>
+          <p style="margin-bottom: 20px; font-size: 0.9rem;">En güncel fırsatlardan anında haberdar olmak için topluluğumuza katılın.</p>
+          <div class="footer-social">
+            <a href="https://www.instagram.com/myt.etu/" target="_blank" class="social-icon-btn" aria-label="Instagram">
+              <i class="fab fa-instagram"></i>
+            </a>
+            <a href="https://www.linkedin.com/company/tobb-et%C3%BC-m%C3%BChendislik-ve-y%C3%B6neticilik-toplulu%C4%9Fu" target="_blank" class="social-icon-btn" aria-label="LinkedIn">
+              <i class="fab fa-linkedin"></i>
+            </a>
+            <a href="https://chat.whatsapp.com/GRsldpURG4GLo5LO4BXXwx" target="_blank" class="social-icon-btn" aria-label="WhatsApp">
+              <i class="fab fa-whatsapp"></i>
+            </a>
+          </div>
+        </div>
       </div>
-    <div style="border-top: 1px solid rgba(255,255,255,0.05); margin-top: 30px; padding-top: 20px; text-align: center;">
-      <p style="color: var(--text-secondary); font-size: 0.8rem; letter-spacing: 0.5px;">
-        &copy; 2026 MYTh Platform. Tüm hakları saklıdır.
-      </p>
-      <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 10px; opacity: 0.8;">
-        Developer: <strong>Sahra Yağmur Berk</strong> 
-        <a href="https://linkedin.com/in/sahrayagmurberk" target="_blank" style="color: var(--primary); text-decoration: none; margin-left: 5px;">
-          <i class="fab fa-linkedin"></i> LinkedIn
-        </a>
-      </p>
+
+      <div class="footer-bottom">
+        <p class="footer-copy">
+          &copy; 2026 MYTh Kart. Tüm hakları saklıdır. TOBB ETÜ Mühendislik ve Yöneticilik Topluluğu.
+        </p>
+        <p class="footer-dev">
+          Developer: <strong>Sahra Yağmur Berk</strong> 
+          <a href="https://linkedin.com/in/sahrayagmurberk" target="_blank" style="margin-left: 8px;">
+            <i class="fab fa-linkedin"></i> LinkedIn
+          </a>
+        </p>
+      </div>
     </div>
   </footer>
 

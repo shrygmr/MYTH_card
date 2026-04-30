@@ -56,9 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // =============================================
     // Mobile Menu
     // =============================================
-    mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('mobile-open'));
+    mobileMenuBtn.addEventListener('click', () => {
+        const isOpen = navLinks.classList.toggle('mobile-open');
+        const icon = mobileMenuBtn.querySelector('i');
+        icon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+    });
+    
     navLinks.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => navLinks.classList.remove('mobile-open'));
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('mobile-open');
+            mobileMenuBtn.querySelector('i').className = 'fas fa-bars';
+        });
     });
 
     // =============================================
@@ -118,9 +126,16 @@ document.addEventListener('DOMContentLoaded', () => {
         return filtered;
     }
 
-    function getCategoryEmoji(cat) {
-        const map = { kafe: '☕', restoran: '🍽️', oyun: '🎮', eglence: '🎉', petshop: '🐾', hizmet: '🛠️' };
-        return map[cat] || '🏷️';
+    function getCategoryIcon(cat) {
+        const map = { 
+            kafe: '<i class="fas fa-coffee"></i>', 
+            restoran: '<i class="fas fa-utensils"></i>', 
+            oyun: '<i class="fas fa-gamepad"></i>', 
+            eglence: '<i class="fas fa-mask"></i>', 
+            petshop: '<i class="fas fa-paw"></i>', 
+            hizmet: '<i class="fas fa-concierge-bell"></i>' 
+        };
+        return map[cat] || '<i class="fas fa-tag"></i>';
     }
 
     function getCategoryLabel(cat) {
@@ -146,7 +161,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (filtered.length === 0) {
-            venuesGrid.innerHTML = `<div class="no-results"><div class="no-results-icon">🔍</div><h3>Sonuç bulunamadı</h3></div>`;
+            venuesGrid.innerHTML = `
+                <div class="no-results">
+                    <div class="no-results-icon"><i class="fas fa-search"></i></div>
+                    <h3>Sonuç bulunamadı</h3>
+                    <p>Farklı bir arama yapmayı veya filtreleri temizlemeyi deneyin.</p>
+                </div>`;
             return;
         }
 
@@ -155,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let ratingHtml = '';
             if (venueReviews.length > 0) {
                 const avg = (venueReviews.reduce((sum, r) => sum + r.rating, 0) / venueReviews.length).toFixed(1);
-                ratingHtml = `<div class="rating-tag">${avg} ⭐</div>`;
+                ratingHtml = `<div class="rating-tag">${avg} <i class="fas fa-star"></i></div>`;
             }
 
             const isFav = favs.includes(venue.id);
@@ -163,16 +183,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             return `
                 <div class="venue-card" data-id="${venue.id}">
-                    <div class="venue-card-img" style="background: linear-gradient(135deg, var(--cat-${venue.category}), #333);">
-                        <span class="venue-emoji">${getCategoryEmoji(venue.category)}</span>
-                        <div class="discount-tag">%${venue.discount}</div>
+                    <div class="venue-card-img" style="background: linear-gradient(135deg, var(--cat-${venue.category}), var(--primary-dark));">
+                        <span class="venue-icon">${getCategoryIcon(venue.category)}</span>
+                        <div class="discount-tag">%${venue.discount} İNDİRİM</div>
                         ${ratingHtml}
                         <button class="fav-btn" data-vid="${venue.id}">${favIcon}</button>
                     </div>
                     <div class="venue-card-body">
-                        <h3>${venue.name}</h3>
-                        <span class="venue-card-category ${venue.category}">${getCategoryLabel(venue.category)}</span>
-                        <div class="venue-card-meta">📍 ${venue.region}</div>
+                        <div class="venue-card-header">
+                            <h3>${venue.name}</h3>
+                            <span class="venue-card-category ${venue.category}">${getCategoryLabel(venue.category)}</span>
+                        </div>
+                        <div class="venue-card-meta">
+                            <span><i class="fas fa-map-marker-alt"></i> ${venue.region}</span>
+                            <span class="venue-card-action">Detaylar <i class="fas fa-chevron-right"></i></span>
+                        </div>
                     </div>
                 </div>`;
         }).join('');

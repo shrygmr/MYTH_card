@@ -78,14 +78,17 @@
           <div style="margin-top: 40px;">
             <h3>Dijital Kartım 📱</h3>
             <p style="color: var(--text-secondary); margin-bottom: 15px;">İndirimlerden faydalanmak için bu QR kodu kasada gösterebilirsiniz.</p>
-            <div style="background: linear-gradient(135deg, var(--primary) 0%, #312e81 100%); padding: 30px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; max-width: 500px; box-shadow: var(--shadow-md);">
-              <div style="color: white;">
-                <h2 style="margin: 0 0 10px 0; color: white;">MYTh Kart</h2>
-                <div style="font-size: 1.2rem; margin-bottom: 5px;" id="dcName">Kullanıcı</div>
-                <div style="opacity: 0.8; font-size: 0.9rem;" id="dcType">Öğrenci</div>
+            <div style="background: url('assets/images/myth_card_real.png') center/cover no-repeat; padding: 40px 30px; border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: space-between; max-width: 500px; box-shadow: var(--shadow-md); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+              <!-- Overlay to ensure text readability -->
+              <div style="position: absolute; inset: 0; background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.6)); z-index: 1;"></div>
+              
+              <div style="color: white; position: relative; z-index: 2;">
+                <h2 style="margin: 0 0 10px 0; color: white; font-family: 'Outfit', sans-serif;">MYTh Kart</h2>
+                <div style="font-size: 1.3rem; font-weight: 700; margin-bottom: 5px;" id="dcName">Kullanıcı</div>
+                <div style="opacity: 0.9; font-size: 0.9rem; font-weight: 500; letter-spacing: 1px;" id="dcType">ÖĞRENCİ</div>
               </div>
-              <div style="background: white; padding: 10px; border-radius: var(--radius-md);">
-                <img id="qrCodeImg" src="" alt="QR Code" style="width: 120px; height: 120px; display: block;">
+              <div style="background: white; padding: 10px; border-radius: var(--radius-md); position: relative; z-index: 2; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <img id="qrCodeImg" src="" alt="QR Code" style="width: 100px; height: 100px; display: block;">
               </div>
             </div>
           </div>

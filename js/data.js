@@ -5,13 +5,13 @@
 (function() {
     // ---- CONSTANTS (UI Only, never saved to Firebase) ----
     const CATEGORIES = [
-        { id: "tumu", label: "Tümü", icon: "🏷️" },
-        { id: "kafe", label: "Kafe", icon: "☕" },
-        { id: "restoran", label: "Restoran", icon: "🍽️" },
-        { id: "oyun", label: "Oyun", icon: "🎮" },
-        { id: "eglence", label: "Eğlence", icon: "🎉" },
-        { id: "petshop", label: "Petshop", icon: "🐾" },
-        { id: "hizmet", label: "Hizmet", icon: "🛠️" }
+        { id: "tumu", label: "Tümü", icon: '<i class="fas fa-th-large"></i>' },
+        { id: "kafe", label: "Kafe", icon: '<i class="fas fa-coffee"></i>' },
+        { id: "restoran", label: "Restoran", icon: '<i class="fas fa-utensils"></i>' },
+        { id: "oyun", label: "Oyun", icon: '<i class="fas fa-gamepad"></i>' },
+        { id: "eglence", label: "Eğlence", icon: '<i class="fas fa-mask"></i>' },
+        { id: "petshop", label: "Petshop", icon: '<i class="fas fa-paw"></i>' },
+        { id: "hizmet", label: "Hizmet", icon: '<i class="fas fa-concierge-bell"></i>' }
     ];
 
     const REGIONS = [

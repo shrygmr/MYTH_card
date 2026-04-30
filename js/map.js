@@ -21,10 +21,11 @@
             zoomControl: true
         });
 
-        // Tile layer (OpenStreetMap)
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 19
+        // Tile layer (CartoDB Positron - More reliable for local/file:// access)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
         }).addTo(map);
 
         // Add venue markers
@@ -52,9 +53,16 @@
         return colors[category] || '#6C3CE1';
     }
 
-    function getCategoryEmoji(cat) {
-        const emojiMap = { kafe: '☕', restoran: '🍽️', oyun: '🎮', eglence: '🎉', petshop: '🐾', hizmet: '🛠️' };
-        return emojiMap[cat] || '🏷️';
+    function getCategoryIcon(cat) {
+        const iconMap = { 
+            kafe: '<i class="fas fa-coffee"></i>', 
+            restoran: '<i class="fas fa-utensils"></i>', 
+            oyun: '<i class="fas fa-gamepad"></i>', 
+            eglence: '<i class="fas fa-mask"></i>', 
+            petshop: '<i class="fas fa-paw"></i>', 
+            hizmet: '<i class="fas fa-concierge-bell"></i>' 
+        };
+        return iconMap[cat] || '<i class="fas fa-tag"></i>';
     }
 
     function getCategoryLabel(cat) {
@@ -64,7 +72,7 @@
 
     function createCustomIcon(category, isHighlighted) {
         const color = getCategoryColor(category);
-        const emoji = getCategoryEmoji(category);
+        const iconHtml = getCategoryIcon(category);
         const size = isHighlighted ? 52 : 40;
         const borderWidth = isHighlighted ? '4px' : '3px';
         const glowShadow = isHighlighted
@@ -84,7 +92,7 @@
           border: ${borderWidth} solid white;
           transition: all 0.3s ease;
         ">
-          <span style="transform: rotate(45deg); font-size: ${isHighlighted ? '22px' : '18px'};">${emoji}</span>
+          <div style="transform: rotate(45deg); color: white; font-size: ${isHighlighted ? '20px' : '16px'};">${iconHtml}</div>
         </div>
       `,
             iconSize: [size, size],
@@ -112,8 +120,8 @@
         ${venue.name}
       </div>
       <div class="popup-body">
-        <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">
-            ${getCategoryEmoji(venue.category)} ${getCategoryLabel(venue.category)}
+        <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem; display: flex; align-items: center; gap: 8px;">
+            <span style="color: ${color}">${getCategoryIcon(venue.category)}</span> ${getCategoryLabel(venue.category)}
         </div>
         <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
             📍 ${venue.region} · ${venue.address}
@@ -269,7 +277,8 @@
         const detail = document.getElementById('nearestDetail');
         const directions = document.getElementById('nearestDirections');
 
-        emoji.textContent = getCategoryEmoji(venue.category);
+        emoji.innerHTML = getCategoryIcon(venue.category);
+        emoji.style.color = getCategoryColor(venue.category);
         name.textContent = venue.name;
 
         const distStr = venue.distance < 1
