@@ -356,9 +356,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Users Logic
     // ---------------------------------------------
     function renderUsersTable() {
-        const usersStr = localStorage.getItem('myth_users');
-        const users = usersStr ? JSON.parse(usersStr) : { students: {}, alumni: {} };
+        // Force refresh from mythDB to ensure we see fresh Firebase data
+        const users = window.mythDB.getUsers ? window.mythDB.getUsers() : JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
         const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
         
         let html = '';
 
