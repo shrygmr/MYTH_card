@@ -180,17 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderVenues() {
-        if (window.isMythSyncing) {
-            venuesGrid.innerHTML = `
-                <div class="sync-loader" style="grid-column: 1/-1; text-align: center; padding: 100px 20px;">
-                    <div class="loader-ripple"><div></div><div></div></div>
-                    <p style="margin-top: 20px; color: var(--text-muted); font-size: 0.9rem; letter-spacing: 1px;">VERİLER SENKRONİZE EDİLİYOR</p>
-                </div>
-            `;
-            // Re-render automatically when sync finishes
-            window.addEventListener('mythDBReady', () => renderVenues(), { once: true });
-            return;
-        }
         const filtered = getFilteredVenues();
         const allReviews = window.mythDB ? window.mythDB.getReviews() : [];
         
