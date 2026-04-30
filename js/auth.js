@@ -182,6 +182,16 @@
               alert("Bu şifre geçersiz veya zaten başka bir öğrenci tarafından kullanılmış.");
               return;
             }
+
+            // EXTRA GUARANTEE: Check if any existing student already has this password
+            const isPinUsed = Object.values(users.students).some(u => u.password === pass);
+            if (isPinUsed) {
+              alert("Bu şifre zaten bir hesapla eşleşmiş. Lütfen kendi kartınızdaki şifreyi kullanın.");
+              // Clean up the available list if it was supposed to be gone
+              window.mythDB.saveAvailablePins(availablePins.filter(p => p !== pass));
+              return;
+            }
+
             studentSubmitBtn.textContent = 'Kaydediliyor...';
             studentSubmitBtn.disabled = true;
             users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
