@@ -116,6 +116,7 @@
                     .set({ data: value })
                     .then(() => {
                         console.log('[MYTh] Saved to Firebase:', key);
+                        window.dispatchEvent(new Event('mythDBUpdated'));
                     })
                     .catch(e => {
                         console.error('[MYTh] Firebase write FAILED:', key, e);

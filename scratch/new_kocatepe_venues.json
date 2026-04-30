@@ -1,0 +1,5 @@
+[
+  { "name": "Kruvasante (Tunalı)", "category": "kafe", "region": "Tunalı", "discount": "Görüşülüyor", "lat": 39.906109, "lng": 32.862939, "address": "Barbaros, Bülten Sk. 31/A", "id": 1081, "description": "Meşhur çıtır kruvasanlar ve tatlılar.", "popular": true, "isNew": true },
+  { "name": "Kruvasante Ümitköy", "category": "kafe", "region": "Ümitköy", "discount": "Görüşülüyor", "lat": 39.894888, "lng": 32.704683, "address": "Mutlukent, 1948. Sk. Mutluköy Sitesi No:8", "id": 1082, "description": "Ümitköy şubesi.", "popular": false, "isNew": true },
+  { "name": "Kruvasante Armada", "category": "kafe", "region": "Beştepe", "discount": "Görüşülüyor", "lat": 39.91252, "lng": 32.80912, "address": "Armada AVM No: 4/10", "id": 1083, "description": "Armada şubesi.", "popular": false, "isNew": true }
+]

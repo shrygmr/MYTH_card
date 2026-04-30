@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="venue-card" data-id="${venue.id}">
                     <div class="venue-card-img" style="background: linear-gradient(135deg, var(--cat-${venue.category}), var(--primary-dark));">
                         <span class="venue-icon">${getCategoryIcon(venue.category)}</span>
-                        <div class="discount-tag">%${venue.discount} İNDİRİM</div>
+                        <div class="discount-tag">${venue.discount && venue.discount.toString().includes('%') ? venue.discount : '%' + venue.discount} İNDİRİM</div>
                         ${ratingHtml}
                         <button class="fav-btn" data-vid="${venue.id}">${favIcon}</button>
                     </div>

@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <td><strong>${v.name}</strong></td>
                 <td>${v.category}</td>
                 <td>${v.region}</td>
-                <td>%${v.discount}</td>
+                <td>${v.discount && v.discount.toString().includes('%') ? v.discount : '%' + v.discount}</td>
                 <td>
                     <button class="action-btn edit" onclick="editVenue(${v.id})"><i class="fas fa-edit"></i></button>
                     <button class="action-btn delete" onclick="deleteVenue(${v.id})"><i class="fas fa-trash"></i></button>
@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 name: document.getElementById('vName').value,
                 category: document.getElementById('vCategory').value,
                 region: document.getElementById('vRegion').value,
-                discount: parseInt(document.getElementById('vDiscount').value),
+                discount: document.getElementById('vDiscount').value,
                 lat: parseFloat(document.getElementById('vLat').value),
                 lng: parseFloat(document.getElementById('vLng').value),
                 address: document.getElementById('vAddress').value,
