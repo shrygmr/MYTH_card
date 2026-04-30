@@ -30,7 +30,7 @@
         { id: "newest", label: "En Yeni" }
     ];
 
-    // ---- Admin & Business credentials (Only seeded if Firebase is empty) ----
+    // ---- Admin credentials (Only seeded if Firebase is completely empty) ----
     const DEFAULT_ADMINS = {
         "sahra.admin": { password: "sahra0267", name: "Sahra" },
         "batu.admin": { password: "MythAdmin2026!02", name: "Batu" },
@@ -44,46 +44,13 @@
         "begum.admin": { password: "MythAdmin2026!10", name: "Begüm" }
     };
 
-    // ---- Public mythDB API ----
-    // saveToCloud: writes to both localStorage AND Firebase, returns a Promise
-    // Admin/business must await this before closing modals so data survives page refresh
-    window.mythDB = {
-        getVenues:  () => JSON.parse(localStorage.getItem('myth_venues')  || '[]'),
-        getDeals:   () => JSON.parse(localStorage.getItem('myth_deals')   || '[]'),
-        getReviews: () => JSON.parse(localStorage.getItem('myth_reviews') || '[]'),
-        getAvailablePins: () => JSON.parse(localStorage.getItem('myth_available_pins') || '[]'),
-
-        // saveToCloud(key, data) — guaranteed write to Firebase, awaitable
-        saveToCloud: function(key, data) {
-            const value = JSON.stringify(data);
-            localStorage.setItem(key, value); // local always first
-            if (window.db) {
-                return window.db.collection('myth_state').doc(key)
-                    .set({ data: value })
-                    .catch(e => console.error('[MYTh] Firebase write error:', key, e));
-            }
-            return Promise.resolve();
-        },
-
-        // Convenience wrappers — these return Promises
-        saveVenues:       (d) => window.mythDB.saveToCloud('myth_venues', d),
-        saveDeals:        (d) => window.mythDB.saveToCloud('myth_deals', d),
-        saveReviews:      (d) => window.mythDB.saveToCloud('myth_reviews', d),
-        saveAvailablePins:(d) => window.mythDB.saveToCloud('myth_available_pins', d),
-        saveUsers:        (d) => window.mythDB.saveToCloud('myth_users', d),
-
-        getCategories:   () => CATEGORIES,
-        getRegions:      () => REGIONS,
-        getSortOptions:  () => SORT_OPTIONS
-    };
-
     // Backwards-compat globals
     window.categories  = CATEGORIES;
     window.regions     = REGIONS;
     window.sortOptions = SORT_OPTIONS;
     window.venues      = [];
 
-    // Mark DB as syncing — UI will show loading until done
+    // Mark DB as syncing — no writes allowed until Firebase is loaded
     window.isMythSyncing = true;
 
     // ---- Firebase Setup ----
@@ -104,81 +71,101 @@
         const db = firebase.firestore();
         window.db = db;
 
-        // Initialize Analytics
+        // Initialize Analytics (optional)
         if (typeof firebase.analytics === 'function') {
-            window.analytics = firebase.analytics();
-            console.log('[MYTh] Analytics initialized');
+            try { window.analytics = firebase.analytics(); } catch(e) {}
         }
 
-        // Keys that should NEVER be pushed from local to cloud
-        const CLOUD_SKIP_KEYS = new Set(['myth_active_session', 'myth-theme']);
+        // -------------------------------------------------------
+        // mythDB API — defined HERE so window.db is always valid
+        // -------------------------------------------------------
+        window.mythDB = {
+            // Getters always read from localStorage (which was loaded from Firebase)
+            getVenues:        () => JSON.parse(localStorage.getItem('myth_venues')         || '[]'),
+            getDeals:         () => JSON.parse(localStorage.getItem('myth_deals')          || '[]'),
+            getReviews:       () => JSON.parse(localStorage.getItem('myth_reviews')        || '[]'),
+            getAvailablePins: () => JSON.parse(localStorage.getItem('myth_available_pins') || '[]'),
 
-        // Keys that should NEVER be pulled from cloud to overwrite local
-        // (session is device-specific)
-        const LOCAL_ONLY_KEYS = new Set(['myth_active_session', 'myth-theme']);
+            getCategories:    () => CATEGORIES,
+            getRegions:       () => REGIONS,
+            getSortOptions:   () => SORT_OPTIONS,
 
-        // Override setItem: auto-sync writes to Firebase
-        // But ONLY after initial sync completes (isMythSyncing = false)
-        const _origSetItem = localStorage.setItem.bind(localStorage);
-        localStorage.setItem = function(key, value) {
-            _origSetItem(key, value);
-            if (
-                key.startsWith('myth_') &&
-                !CLOUD_SKIP_KEYS.has(key) &&
-                window.db &&
-                !window.isMythSyncing
-            ) {
-                window.db.collection('myth_state').doc(key)
+            // saveToCloud: writes to localStorage AND directly to Firebase (no override dependency)
+            // Returns a Promise — always await this before closing modals / redirecting
+            saveToCloud: function(key, data) {
+                const value = JSON.stringify(data);
+                localStorage.setItem(key, value);   // local cache
+
+                // Direct Firebase write — this is the ONLY source of truth
+                return db.collection('myth_state').doc(key)
                     .set({ data: value })
-                    .catch(e => console.error('[MYTh] Firebase write error:', key, e));
-            }
+                    .then(() => {
+                        console.log('[MYTh] Saved to Firebase:', key);
+                    })
+                    .catch(e => {
+                        console.error('[MYTh] Firebase write FAILED:', key, e);
+                    });
+            },
+
+            // Convenience save wrappers (all return Promises)
+            saveVenues:        (d) => window.mythDB.saveToCloud('myth_venues', d),
+            saveDeals:         (d) => window.mythDB.saveToCloud('myth_deals', d),
+            saveReviews:       (d) => window.mythDB.saveToCloud('myth_reviews', d),
+            saveAvailablePins: (d) => window.mythDB.saveToCloud('myth_available_pins', d),
+            saveUsers:         (d) => window.mythDB.saveToCloud('myth_users', d),
+            saveAdmins:        (d) => window.mythDB.saveToCloud('myth_admins', d),
         };
 
-        // ---- Main Sync: Firebase is the single source of truth ----
+        // -------------------------------------------------------
+        // Main Sync: Firebase is the SINGLE source of truth
+        // Called ONCE on page load. Never seeds if data exists.
+        // -------------------------------------------------------
         async function syncFromFirebase() {
             try {
                 const snapshot = await db.collection('myth_state').get();
 
                 if (snapshot.empty) {
-                    // Firebase is completely empty — seed with safe defaults
-                    console.log('[MYTh] Firebase empty — seeding defaults');
+                    // Firebase has NOTHING — first ever run, seed safe defaults
+                    console.log('[MYTh] Firebase empty — seeding defaults for first run');
                     const seeds = {
-                        'myth_venues':   '[]',
-                        'myth_deals':    '[]',
-                        'myth_reviews':  '[]',
-                        'myth_users':    JSON.stringify({ students: {}, alumni: {} }),
-                        'myth_admins':   JSON.stringify(DEFAULT_ADMINS),
-                        'myth_businesses': '{}'
+                        'myth_venues':        '[]',
+                        'myth_deals':         '[]',
+                        'myth_reviews':       '[]',
+                        'myth_users':         JSON.stringify({ students: {}, alumni: {} }),
+                        'myth_admins':        JSON.stringify(DEFAULT_ADMINS),
+                        'myth_businesses':    '{}',
+                        'myth_available_pins': '[]'
                     };
                     const batch = db.batch();
                     for (const [key, val] of Object.entries(seeds)) {
-                        _origSetItem(key, val);
+                        localStorage.setItem(key, val);
                         batch.set(db.collection('myth_state').doc(key), { data: val });
                     }
                     await batch.commit();
+
                 } else {
-                    // Firebase has data — it is the authority, overwrite localStorage
+                    // Firebase has data — load everything from Firebase into localStorage
                     console.log('[MYTh] Loading', snapshot.size, 'keys from Firebase');
                     snapshot.forEach(doc => {
                         const key = doc.id;
                         const val = doc.data().data;
-                        if (val && !LOCAL_ONLY_KEYS.has(key)) {
-                            _origSetItem(key, val);
+                        // Never overwrite device-specific keys
+                        if (val !== undefined && key !== 'myth_active_session' && key !== 'myth-theme') {
+                            localStorage.setItem(key, val);
                         }
                     });
                 }
 
-                // Update global venues reference
+                // Sync complete — update global reference and notify UI
                 window.venues = JSON.parse(localStorage.getItem('myth_venues') || '[]');
-                // Notify UI that data is ready
                 window.isMythSyncing = false;
                 window.dispatchEvent(new Event('mythDBReady'));
                 console.log('[MYTh] Sync complete. Venues:', window.venues.length);
 
             } catch (e) {
-                console.error('[MYTh] Firebase sync failed:', e);
-                // Fall back gracefully — run without cloud
+                console.error('[MYTh] Firebase sync failed, running in offline mode:', e);
                 window.isMythSyncing = false;
+                window.venues = JSON.parse(localStorage.getItem('myth_venues') || '[]');
                 window.dispatchEvent(new Event('mythDBReady'));
             }
         }
@@ -186,10 +173,27 @@
         syncFromFirebase();
 
     } catch(e) {
-        console.warn('[MYTh] Firebase init failed:', e);
-        // If Firebase totally broken, still allow app to run
+        console.error('[MYTh] Firebase init failed:', e);
+        // Still allow app to run offline
         window.isMythSyncing = false;
         window.venues = JSON.parse(localStorage.getItem('myth_venues') || '[]');
+
+        // Fallback mythDB without Firebase
+        window.mythDB = {
+            getVenues:        () => JSON.parse(localStorage.getItem('myth_venues')         || '[]'),
+            getDeals:         () => JSON.parse(localStorage.getItem('myth_deals')          || '[]'),
+            getReviews:       () => JSON.parse(localStorage.getItem('myth_reviews')        || '[]'),
+            getAvailablePins: () => JSON.parse(localStorage.getItem('myth_available_pins') || '[]'),
+            getCategories:    () => CATEGORIES,
+            getRegions:       () => REGIONS,
+            getSortOptions:   () => SORT_OPTIONS,
+            saveToCloud:      (key, data) => { localStorage.setItem(key, JSON.stringify(data)); return Promise.resolve(); },
+            saveVenues:       (d) => window.mythDB.saveToCloud('myth_venues', d),
+            saveDeals:        (d) => window.mythDB.saveToCloud('myth_deals', d),
+            saveReviews:      (d) => window.mythDB.saveToCloud('myth_reviews', d),
+            saveAvailablePins:(d) => window.mythDB.saveToCloud('myth_available_pins', d),
+            saveUsers:        (d) => window.mythDB.saveToCloud('myth_users', d),
+        };
     }
 
 })();
