@@ -26,9 +26,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function loadProfileData() {
         const users = JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
         const userGroup = isStudent ? users.students : users.alumni;
-        const userData = userGroup[identifier];
+        
+        // Find user with case-insensitive match just in case
+        const cleanId = identifier.trim().toUpperCase();
+        const userData = userGroup[cleanId] || userGroup[identifier];
 
         if (userData) {
+            // Show PIN/Password as Card No for now, or use a custom cardNo if exists
             document.getElementById('pCardNo').textContent = userData.password || 'Bilinmiyor';
             
             if (userData.registeredAt) {
@@ -37,8 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     year: 'numeric', month: 'long', day: 'numeric'
                 });
             } else {
-                document.getElementById('pRegDate').textContent = 'Bilinmiyor';
+                document.getElementById('pRegDate').textContent = 'Kayıtlı';
             }
+        } else {
+            // Fallback if userData not found in the users list
+            document.getElementById('pCardNo').textContent = 'Kayıtlı';
+            document.getElementById('pRegDate').textContent = 'Kayıtlı';
         }
     }
 
