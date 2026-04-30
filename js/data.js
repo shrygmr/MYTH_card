@@ -122,18 +122,29 @@
         // -------------------------------------------------------
         async function syncFromFirebase() {
             try {
-                const snapshot = await db.collection('myth_state').get();
+                // ----------------------------------------------------------
+                // SENTINEL CHECK: Look for myth_meta/initialized document.
+                // This is written ONCE on first-ever run and never deleted.
+                // If it exists → Firebase is initialized, NEVER seed.
+                // If it doesn't exist → first run ever, seed defaults.
+                // This prevents accidental data wipe due to:
+                //   - Network blips returning empty snapshot
+                //   - Firebase quota exceeded
+                //   - Any other transient error
+                // ----------------------------------------------------------
+                const sentinelRef = db.collection('myth_meta').doc('initialized');
+                const sentinelDoc = await sentinelRef.get();
 
-                if (snapshot.empty) {
-                    // Firebase has NOTHING — first ever run, seed safe defaults
-                    console.log('[MYTh] Firebase empty — seeding defaults for first run');
+                if (!sentinelDoc.exists) {
+                    // Truly first run — seed defaults and write sentinel
+                    console.log('[MYTh] First run detected — seeding defaults');
                     const seeds = {
-                        'myth_venues':        '[]',
-                        'myth_deals':         '[]',
-                        'myth_reviews':       '[]',
-                        'myth_users':         JSON.stringify({ students: {}, alumni: {} }),
-                        'myth_admins':        JSON.stringify(DEFAULT_ADMINS),
-                        'myth_businesses':    '{}',
+                        'myth_venues':         '[]',
+                        'myth_deals':          '[]',
+                        'myth_reviews':        '[]',
+                        'myth_users':          JSON.stringify({ students: {}, alumni: {} }),
+                        'myth_admins':         JSON.stringify(DEFAULT_ADMINS),
+                        'myth_businesses':     '{}',
                         'myth_available_pins': '[]'
                     };
                     const batch = db.batch();
@@ -141,28 +152,37 @@
                         localStorage.setItem(key, val);
                         batch.set(db.collection('myth_state').doc(key), { data: val });
                     }
+                    // Write sentinel — this will prevent any future seeding
+                    batch.set(sentinelRef, {
+                        initializedAt: new Date().toISOString(),
+                        version: 1
+                    });
                     await batch.commit();
+                    console.log('[MYTh] Sentinel written — database initialized');
 
                 } else {
-                    // Firebase has data — load everything from Firebase into localStorage
+                    // Sentinel exists → database was already initialized
+                    // Load all keys from Firebase, NEVER seed/overwrite
+                    const snapshot = await db.collection('myth_state').get();
                     console.log('[MYTh] Loading', snapshot.size, 'keys from Firebase');
                     snapshot.forEach(doc => {
                         const key = doc.id;
                         const val = doc.data().data;
-                        // Never overwrite device-specific keys
                         if (val !== undefined && key !== 'myth_active_session' && key !== 'myth-theme') {
                             localStorage.setItem(key, val);
                         }
                     });
                 }
 
-                // Sync complete — update global reference and notify UI
+                // Sync complete
                 window.venues = JSON.parse(localStorage.getItem('myth_venues') || '[]');
                 window.isMythSyncing = false;
                 window.dispatchEvent(new Event('mythDBReady'));
                 console.log('[MYTh] Sync complete. Venues:', window.venues.length);
 
             } catch (e) {
+                // Network or quota error — run with whatever is in localStorage
+                // NEVER seed or overwrite Firebase in error state
                 console.error('[MYTh] Firebase sync failed, running in offline mode:', e);
                 window.isMythSyncing = false;
                 window.venues = JSON.parse(localStorage.getItem('myth_venues') || '[]');
