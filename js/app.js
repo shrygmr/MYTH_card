@@ -1,5 +1,5 @@
 // =============================================
-// MYTh Kart — Main Application Logic
+// MYTh Kart — Main Application Logic (Optimized)
 // =============================================
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -49,25 +49,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Navbar Scroll Effect
     // =============================================
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
-        } else {
-            navbar.classList.remove('scrolled');
-        }
+        if (window.scrollY > 50) navbar.classList.add('scrolled');
+        else navbar.classList.remove('scrolled');
     });
 
     // =============================================
     // Mobile Menu
     // =============================================
-    mobileMenuBtn.addEventListener('click', () => {
-        navLinks.classList.toggle('mobile-open');
-    });
-
-    // Close mobile menu on link click
+    mobileMenuBtn.addEventListener('click', () => navLinks.classList.toggle('mobile-open'));
     navLinks.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-            navLinks.classList.remove('mobile-open');
-        });
+        link.addEventListener('click', () => navLinks.classList.remove('mobile-open'));
     });
 
     // =============================================
@@ -88,11 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
     function populateCategories() {
         categoryPills.innerHTML = categories.map(c =>
             `<button class="cat-pill ${c.id === activeCategory ? 'active' : ''}" data-category="${c.id}">
-        ${c.icon} ${c.label}
-      </button>`
+                ${c.icon} ${c.label}
+            </button>`
         ).join('');
 
-        // Bind events
         categoryPills.querySelectorAll('.cat-pill').forEach(pill => {
             pill.addEventListener('click', () => {
                 activeCategory = pill.dataset.category;
@@ -102,80 +92,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    populateRegions();
-    populateSortOptions();
-    populateCategories();
-
     // =============================================
-    // Filter & Search Events
-    // =============================================
-    searchInput.addEventListener('input', (e) => {
-        searchQuery = e.target.value.toLowerCase().trim();
-        renderVenues();
-    });
-
-    regionFilter.addEventListener('change', (e) => {
-        activeRegion = e.target.value;
-        renderVenues();
-    });
-
-    sortFilter.addEventListener('change', (e) => {
-        activeSort = e.target.value;
-        renderVenues();
-    });
-
-    // =============================================
-    // Render Venues
+    // Render Logic
     // =============================================
     function getFilteredVenues() {
-        const dbVenues = window.mythDB ? window.mythDB.getVenues() : venues;
+        const dbVenues = window.mythDB ? window.mythDB.getVenues() : (window.venues || []);
         let filtered = [...dbVenues];
 
-        // Category
-        if (activeCategory !== 'tumu') {
-            filtered = filtered.filter(v => v.category === activeCategory);
-        }
-
-        // Region
-        if (activeRegion !== 'Tümü') {
-            filtered = filtered.filter(v => v.region === activeRegion);
-        }
-
-        // Search
+        if (activeCategory !== 'tumu') filtered = filtered.filter(v => v.category === activeCategory);
+        if (activeRegion !== 'Tümü') filtered = filtered.filter(v => v.region === activeRegion);
         if (searchQuery) {
             filtered = filtered.filter(v =>
                 v.name.toLowerCase().includes(searchQuery) ||
-                v.description.toLowerCase().includes(searchQuery) ||
-                v.address.toLowerCase().includes(searchQuery)
+                (v.description && v.description.toLowerCase().includes(searchQuery)) ||
+                (v.address && v.address.toLowerCase().includes(searchQuery))
             );
         }
 
-        // Sort
         switch (activeSort) {
-            case 'discount-high':
-                filtered.sort((a, b) => b.discount - a.discount);
-                break;
-            case 'discount-low':
-                filtered.sort((a, b) => a.discount - b.discount);
-                break;
-            case 'popular':
-                filtered.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0));
-                break;
-            case 'newest':
-                filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-                break;
+            case 'discount-high': filtered.sort((a, b) => parseFloat(b.discount || 0) - parseFloat(a.discount || 0)); break;
+            case 'discount-low': filtered.sort((a, b) => parseFloat(a.discount || 0) - parseFloat(b.discount || 0)); break;
+            case 'popular': filtered.sort((a, b) => (b.popular ? 1 : 0) - (a.popular ? 1 : 0)); break;
+            case 'newest': filtered.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0)); break;
         }
-
         return filtered;
     }
 
     function getCategoryEmoji(cat) {
-        const map = { kafe: '☕', restoran: '🍽️', oyun: '🎮', eglence: '🎉' };
+        const map = { kafe: '☕', restoran: '🍽️', oyun: '🎮', eglence: '🎉', petshop: '🐾', hizmet: '🛠️' };
         return map[cat] || '🏷️';
     }
 
     function getCategoryLabel(cat) {
-        const map = { kafe: 'Kafe', restoran: 'Restoran', oyun: 'Oyun', eglence: 'Eğlence' };
+        const map = { kafe: 'Kafe', restoran: 'Restoran', oyun: 'Oyun', eglence: 'Eğlence', petshop: 'Petshop', hizmet: 'Hizmet' };
         return map[cat] || cat;
     }
 
@@ -192,20 +141,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeId = session.identifier;
                 const usersData = JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
                 const userGrp = session.type === 'student' ? usersData.students : usersData.alumni;
-                if (userGrp[activeId]) {
-                    favs = userGrp[activeId].favorites || [];
-                }
+                if (userGrp[activeId]) favs = userGrp[activeId].favorites || [];
             }
         }
 
         if (filtered.length === 0) {
-            venuesGrid.innerHTML = `
-        <div class="no-results">
-          <div class="no-results-icon">🔍</div>
-          <h3>Sonuç bulunamadı</h3>
-          <p>Arama kriterlerinizi değiştirmeyi deneyin.</p>
-        </div>
-      `;
+            venuesGrid.innerHTML = `<div class="no-results"><div class="no-results-icon">🔍</div><h3>Sonuç bulunamadı</h3></div>`;
             return;
         }
 
@@ -221,217 +162,118 @@ document.addEventListener('DOMContentLoaded', () => {
             const favIcon = isFav ? '<i class="fas fa-heart" style="color:#EF4444;"></i>' : '<i class="far fa-heart"></i>';
 
             return `
-      <div class="venue-card" data-id="${venue.id}">
-        <div class="venue-card-img" style="background: linear-gradient(135deg, var(--cat-${venue.category}), ${getDarkerShade(venue.category)});">
-          <span class="venue-emoji">${getCategoryEmoji(venue.category)}</span>
-          <div class="discount-tag">%${venue.discount}</div>
-          ${ratingHtml}
-          ${venue.isNew ? '<div class="new-tag" style="top: 10px; left: 10px; right: auto;">Yeni!</div>' : ''}
-          ${venue.popular ? '<div class="popular-tag" style="top: 10px; left: 10px; right: auto;">🏆 Popüler</div>' : ''}
-          <button class="fav-btn" data-vid="${venue.id}">${favIcon}</button>
-        </div>
-        <div class="venue-card-body">
-          <h3>${venue.name}</h3>
-          <span class="venue-card-category ${venue.category}">
-            ${getCategoryEmoji(venue.category)} ${getCategoryLabel(venue.category)}
-          </span>
-          <p class="venue-card-desc">${venue.description}</p>
-          <div class="venue-card-meta">
-            <span class="meta-icon">📍</span> ${venue.region} · ${venue.address.split(',')[0]}
-          </div>
-        </div>
-      </div>
-    `}).join('');
+                <div class="venue-card" data-id="${venue.id}">
+                    <div class="venue-card-img" style="background: linear-gradient(135deg, var(--cat-${venue.category}), #333);">
+                        <span class="venue-emoji">${getCategoryEmoji(venue.category)}</span>
+                        <div class="discount-tag">%${venue.discount}</div>
+                        ${ratingHtml}
+                        <button class="fav-btn" data-vid="${venue.id}">${favIcon}</button>
+                    </div>
+                    <div class="venue-card-body">
+                        <h3>${venue.name}</h3>
+                        <span class="venue-card-category ${venue.category}">${getCategoryLabel(venue.category)}</span>
+                        <div class="venue-card-meta">📍 ${venue.region}</div>
+                    </div>
+                </div>`;
+        }).join('');
 
-        // Favorite Toggle
+        // Re-bind events
         venuesGrid.querySelectorAll('.fav-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                e.stopPropagation(); // prevent card click
-                if (!activeId) {
-                    alert('Favorilere eklemek için lütfen giriş yapın.');
-                    return;
-                }
+                e.stopPropagation();
+                if (!activeId) { alert('Lütfen giriş yapın.'); return; }
                 const vId = parseInt(btn.dataset.vid);
                 const usersData = JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
                 const session = JSON.parse(localStorage.getItem('myth_active_session'));
                 const userGrp = session.type === 'student' ? usersData.students : usersData.alumni;
-                
                 if (!userGrp[activeId].favorites) userGrp[activeId].favorites = [];
-                
-                if (userGrp[activeId].favorites.includes(vId)) {
-                    userGrp[activeId].favorites = userGrp[activeId].favorites.filter(id => id !== vId);
-                } else {
-                    userGrp[activeId].favorites.push(vId);
-                }
+                if (userGrp[activeId].favorites.includes(vId)) userGrp[activeId].favorites = userGrp[activeId].favorites.filter(id => id !== vId);
+                else userGrp[activeId].favorites.push(vId);
                 localStorage.setItem('myth_users', JSON.stringify(usersData));
-                renderVenues(); // re-render to update heart color
+                renderVenues();
             });
         });
 
-        // Click to scroll to map
         venuesGrid.querySelectorAll('.venue-card').forEach(card => {
             card.addEventListener('click', () => {
                 const venueId = parseInt(card.dataset.id);
-                const dbVenues = window.mythDB ? window.mythDB.getVenues() : venues;
+                const dbVenues = window.mythDB ? window.mythDB.getVenues() : (window.venues || []);
                 const venue = dbVenues.find(v => v.id === venueId);
                 if (venue && window.mythMap) {
                     document.getElementById('map').scrollIntoView({ behavior: 'smooth' });
-                    setTimeout(() => {
-                        window.mythMap.flyToVenue(venue);
-                    }, 500);
+                    setTimeout(() => window.mythMap.flyToVenue(venue), 500);
                 }
             });
         });
     }
 
-    function getDarkerShade(category) {
-        const map = {
-            kafe: '#6D28D9',
-            restoran: '#B91C1C',
-            oyun: '#1D4ED8',
-            eglence: '#D97706'
-        };
-        return map[category] || '#4C1D95';
-    }
-
-    renderVenues();
-
-    // =============================================
-    // Render Weekly Deals
-    // =============================================
     function renderDeals() {
         const dealsContainer = document.getElementById('weeklyDealsContainer');
         if (!dealsContainer) return;
-        
         const deals = window.mythDB ? window.mythDB.getDeals() : [];
-        const dbVenues = window.mythDB ? window.mythDB.getVenues() : venues;
-        
-        if (deals.length === 0) {
-            dealsContainer.innerHTML = '<p>Şu an aktif bir fırsat bulunmuyor.</p>';
-            return;
-        }
-
+        const dbVenues = window.mythDB ? window.mythDB.getVenues() : (window.venues || []);
+        if (deals.length === 0) { dealsContainer.innerHTML = '<p>Aktif fırsat bulunmuyor.</p>'; return; }
         dealsContainer.innerHTML = deals.map(deal => {
             const venue = dbVenues.find(v => v.id === deal.venueId);
-            const venueName = venue ? venue.name : 'Bilinmeyen Mekan';
-            const dealIcon = deal.type === 'hediye' ? '🎁' : '🔥';
-            return `
-                <div class="deal-card" style="background: var(--bg-card); border: 1px solid var(--primary); padding: 16px; border-radius: var(--radius-md); margin-bottom: 12px; display: flex; align-items: center; gap: 16px;">
-                    <div style="font-size: 2rem;">${dealIcon}</div>
-                    <div>
-                        <h4 style="margin: 0; color: var(--primary);">${venueName}</h4>
-                        <h3 style="margin: 4px 0;">${deal.title}</h3>
-                        <p style="margin: 4px 0 8px 0; font-size: 0.9rem; color: var(--text-secondary);">${deal.description}</p>
-                        <small style="color: var(--text-muted);">Geçerlilik: ${deal.validUntil}</small>
-                    </div>
-                </div>
-            `;
+            return `<div class="deal-card"><h4>${venue ? venue.name : ''}</h4><h3>${deal.title}</h3><p>${deal.description}</p></div>`;
         }).join('');
     }
 
-    renderDeals();
+    // =============================================
+    // Initialization
+    // =============================================
+    function init() {
+        if (window.mythDB) {
+            window.venues = window.mythDB.getVenues();
+            window.deals = window.mythDB.getDeals();
+        }
+        populateRegions();
+        populateSortOptions();
+        populateCategories();
+        renderVenues();
+        renderDeals();
+    }
 
-    // =============================================
-    // Smooth Scroll for Nav Links
-    // =============================================
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
+    // Filters
+    searchInput.addEventListener('input', (e) => { searchQuery = e.target.value.toLowerCase().trim(); renderVenues(); });
+    regionFilter.addEventListener('change', (e) => { activeRegion = e.target.value; renderVenues(); });
+    sortFilter.addEventListener('change', (e) => { activeSort = e.target.value; renderVenues(); });
 
-    // =============================================
-    // Active Nav Link Highlight
-    // =============================================
-    const sections = document.querySelectorAll('section[id]');
-    const navLinksList = document.querySelectorAll('.nav-link');
+    // Sync Events
+    window.addEventListener('mythDBReady', init);
+    window.addEventListener('mythDBUpdated', init);
 
-    window.addEventListener('scroll', () => {
-        let current = '';
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop - 120;
-            if (window.scrollY >= sectionTop) {
-                current = section.getAttribute('id');
-            }
-        });
+    // Run first init
+    init();
 
-        navLinksList.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
-        });
-    });
-
-    // =============================================
-    // Stats Counter Animation
-    // =============================================
+    // Counter Animation
     let statsAnimated = false;
-    const aboutSection = document.getElementById('about');
-
     function animateCounters() {
-        if (statsAnimated) return;
-
-        const rect = aboutSection.getBoundingClientRect();
+        if (statsAnimated || !document.getElementById('about')) return;
+        const rect = document.getElementById('about').getBoundingClientRect();
         if (rect.top < window.innerHeight && rect.bottom > 0) {
             statsAnimated = true;
-
-            const venueCount = window.mythDB ? window.mythDB.getVenues().length : venues.length;
-
+            const vCount = window.venues ? window.venues.length : 0;
             animateNumber('statMembers', 0, 500, 1500, '+');
-            animateNumber('statVenues', 0, venueCount, 1000, '');
+            animateNumber('statVenues', 0, vCount, 1000, '');
             animateNumber('statDiscount', 0, 30, 1200, '', '%', true);
         }
     }
 
     function animateNumber(elementId, start, end, duration, suffix = '', prefix = '', prefixFirst = false) {
         const el = document.getElementById(elementId);
+        if (!el) return;
         const range = end - start;
         const startTime = performance.now();
-
         function step(timestamp) {
             const progress = Math.min((timestamp - startTime) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
-            const current = Math.floor(start + range * eased);
-
-            if (prefixFirst) {
-                el.textContent = `${prefix}${current}${suffix}`;
-            } else {
-                el.textContent = `${current}${suffix}`;
-            }
-
-            if (progress < 1) {
-                requestAnimationFrame(step);
-            }
+            const current = Math.floor(start + range * (1 - Math.pow(1 - progress, 3)));
+            el.textContent = prefixFirst ? `${prefix}${current}${suffix}` : `${current}${suffix}`;
+            if (progress < 1) requestAnimationFrame(step);
         }
-
         requestAnimationFrame(step);
     }
 
     window.addEventListener('scroll', animateCounters);
-    animateCounters(); // check on load
-
-    // =============================================
-    // Firebase Realtime Sync Listeners
-    // =============================================
-    function refreshAppData() {
-        if (!window.mythDB) return;
-        
-        // Update global variables that filters rely on
-        window.venues = window.mythDB.getVenues();
-        window.deals = window.mythDB.getDeals();
-        
-        // Re-render everything
-        renderVenues();
-        renderDeals();
-        animateCounters();
-    }
-
-    // Listen for both initial ready and subsequent updates
-    window.addEventListener('mythDBReady', refreshAppData);
-    window.addEventListener('mythDBUpdated', refreshAppData);
+    animateCounters();
 });
