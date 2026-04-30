@@ -1293,10 +1293,24 @@ img {
   }
 }
 
-@media (max-width: 640px) {
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 40px;
+    text-align: center;
+  }
+
+  .footer-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .footer-about p {
+    max-width: 100%;
+  }
+
+  .footer-contact-item {
+    justify-content: center;
   }
   
   .footer-bottom {
@@ -1401,16 +1415,25 @@ img {
   }
 
   .about-stats {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 30px;
+  }
+
+  .about-visual {
+    margin-top: 40px;
   }
 
   .stat-item {
-    padding: 14px 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
   }
 
-  .stat-number {
-    font-size: 1.5rem;
+  .stat-info {
+    text-align: right;
   }
 
   .map-container {
