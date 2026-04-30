@@ -535,19 +535,16 @@ img {
   position: relative;
 }
 
-.about-card-visual {
-  width: 100%;
-  aspect-ratio: 16/10;
-  background: linear-gradient(135deg, var(--primary), var(--primary-dark), var(--accent));
-  border-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
+.about-card-real {
   position: relative;
-  overflow: hidden;
-  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 450px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+.about-card-real img:hover {
+  transform: perspective(1000px) rotateY(0deg) rotateX(0deg) scale(1.05) !important;
 }
 
 .about-card-visual::before {
