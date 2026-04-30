@@ -58,6 +58,11 @@
   --cat-restoran: #EF4444;
   --cat-oyun: #3B82F6;
   --cat-eglence: #F59E0B;
+  --cat-petshop: #10B981;
+  --cat-hizmet: #6366F1;
+
+  /* Animations */
+  --anim-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 /* ---- Dark Theme ---- */
@@ -176,8 +181,8 @@ img {
   background: var(--bg-glass-strong);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+  border-bottom: 1px solid var(--border-strong);
+  box-shadow: 0 10px 30px -10px rgba(108, 60, 225, 0.2);
   padding: 10px 0;
 }
 

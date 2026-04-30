@@ -45,18 +45,20 @@
             kafe: '#8B5CF6',
             restoran: '#EF4444',
             oyun: '#3B82F6',
-            eglence: '#F59E0B'
+            eglence: '#F59E0B',
+            petshop: '#10B981',
+            hizmet: '#6366F1'
         };
         return colors[category] || '#6C3CE1';
     }
 
     function getCategoryEmoji(cat) {
-        const emojiMap = { kafe: '☕', restoran: '🍽️', oyun: '🎮', eglence: '🎉' };
+        const emojiMap = { kafe: '☕', restoran: '🍽️', oyun: '🎮', eglence: '🎉', petshop: '🐾', hizmet: '🛠️' };
         return emojiMap[cat] || '🏷️';
     }
 
     function getCategoryLabel(cat) {
-        const labels = { kafe: 'Kafe', restoran: 'Restoran', oyun: 'Oyun', eglence: 'Eğlence' };
+        const labels = { kafe: 'Kafe', restoran: 'Restoran', oyun: 'Oyun', eglence: 'Eğlence', petshop: 'Petshop', hizmet: 'Hizmet' };
         return labels[cat] || cat;
     }
 
@@ -104,20 +106,31 @@
 
     function buildPopupHtml(venue) {
         const directionsUrl = getDirectionsUrl(venue);
+        const color = getCategoryColor(venue.category);
         return `
-      <div class="map-popup-title">${venue.name}</div>
-      <div class="map-popup-cat">${getCategoryEmoji(venue.category)} ${getCategoryLabel(venue.category)} · ${venue.region}</div>
-      <div class="map-popup-discount">%${venue.discount} İndirim</div>
-      <div style="font-size: 0.8rem; color: #666; margin-top: 4px;">📍 ${venue.address}</div>
-      <a href="${directionsUrl}" target="_blank" style="
-        display: inline-flex; align-items: center; gap: 6px;
-        margin-top: 10px; padding: 6px 14px;
-        background: #4285F4; color: white;
-        border-radius: 20px; font-size: 0.8rem; font-weight: 600;
-        text-decoration: none; transition: background 0.2s;
-      " onmouseover="this.style.background='#3367D6'" onmouseout="this.style.background='#4285F4'">
-        <i class="fas fa-diamond-turn-right"></i> Google Maps'te Yol Tarifi
-      </a>
+      <div class="popup-header" style="background: ${color};">
+        ${venue.name}
+      </div>
+      <div class="popup-body">
+        <div style="font-weight: 600; color: var(--text-primary); font-size: 0.9rem;">
+            ${getCategoryEmoji(venue.category)} ${getCategoryLabel(venue.category)}
+        </div>
+        <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 4px;">
+            📍 ${venue.region} · ${venue.address}
+        </div>
+        <div class="popup-discount" style="background: ${color};">
+            %${venue.discount} İndirim
+        </div>
+        <a href="${directionsUrl}" target="_blank" style="
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            margin-top: 12px; padding: 8px 12px;
+            background: var(--text-primary); color: white;
+            border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 600;
+            text-decoration: none; transition: transform 0.2s;
+        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+            <i class="fas fa-location-arrow"></i> Yol Tarifi Al
+        </a>
+      </div>
     `;
     }
 
