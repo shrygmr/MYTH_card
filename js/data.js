@@ -10,7 +10,8 @@
         { id: "restoran", label: "Restoran", icon: "🍽️" },
         { id: "oyun", label: "Oyun", icon: "🎮" },
         { id: "eglence", label: "Eğlence", icon: "🎉" },
-        { id: "petshop", label: "Petshop", icon: "🐾" }
+        { id: "petshop", label: "Petshop", icon: "🐾" },
+        { id: "hizmet", label: "Hizmet", icon: "🛠️" }
     ];
 
     const REGIONS = [
@@ -22,9 +23,14 @@
         "Tunalı",
         "Emek",
         "Ümitköy",
+        "Çayyolu",
+        "Beytepe",
+        "Beştepe",
+        "Batıkent",
+        "Koru",
+        "İncek-Gölbaşı",
         "Etimesgut",
-        "Keçiören",
-        "Beytepe"
+        "Keçiören"
     ];
 
     const SORT_OPTIONS = [
