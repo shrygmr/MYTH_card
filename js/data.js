@@ -9,7 +9,8 @@
         { id: "kafe", label: "Kafe", icon: "☕" },
         { id: "restoran", label: "Restoran", icon: "🍽️" },
         { id: "oyun", label: "Oyun", icon: "🎮" },
-        { id: "eglence", label: "Eğlence", icon: "🎉" }
+        { id: "eglence", label: "Eğlence", icon: "🎉" },
+        { id: "petshop", label: "Petshop", icon: "🐾" }
     ];
 
     const REGIONS = [
@@ -18,8 +19,12 @@
         "Bilkent",
         "Çankaya",
         "Kızılay",
+        "Tunalı",
+        "Emek",
+        "Ümitköy",
         "Etimesgut",
-        "Keçiören"
+        "Keçiören",
+        "Beytepe"
     ];
 
     const SORT_OPTIONS = [
