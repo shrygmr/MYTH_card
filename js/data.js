@@ -29,6 +29,10 @@
         "Batıkent",
         "Koru",
         "İncek-Gölbaşı",
+        "Mamak",
+        "Balgat",
+        "Eryaman",
+        "Gazi Mah.",
         "Etimesgut",
         "Keçiören"
     ];
