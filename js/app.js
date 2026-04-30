@@ -426,17 +426,23 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', animateCounters);
     animateCounters(); // check on load
 
-    // Firebase Realtime Sync Listener
-    window.addEventListener('mythDBUpdated', () => {
-        if(window.mythDB) {
-            window.venues = window.mythDB.getVenues();
-            const activeCat = document.querySelector('.category-btn.active').dataset.cat;
-            const activeRegion = document.getElementById('regionFilter').value;
-            const activeSort = document.getElementById('sortFilter').value;
-            renderVenues(window.venues);
-            // Simulate re-filtering
-            document.getElementById('regionFilter').dispatchEvent(new Event('change'));
-            renderDeals();
-        }
-    });
+    // =============================================
+    // Firebase Realtime Sync Listeners
+    // =============================================
+    function refreshAppData() {
+        if (!window.mythDB) return;
+        
+        // Update global variables that filters rely on
+        window.venues = window.mythDB.getVenues();
+        window.deals = window.mythDB.getDeals();
+        
+        // Re-render everything
+        renderVenues();
+        renderDeals();
+        animateCounters();
+    }
+
+    // Listen for both initial ready and subsequent updates
+    window.addEventListener('mythDBReady', refreshAppData);
+    window.addEventListener('mythDBUpdated', refreshAppData);
 });
