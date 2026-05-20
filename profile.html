@@ -6,7 +6,7 @@
   <title>MYTh Kart | Hesabım</title>
   
   <link rel="stylesheet" href="css/style.css?v=5">
-  <link rel="stylesheet" href="css/admin.css?v=2">
+  <link rel="stylesheet" href="css/admin.css?v=3">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 </head>
 <body class="admin-body">
@@ -65,6 +65,86 @@
               </div>
             </div>
           </div>
+
+          <!-- DeFacto Campaign Banner -->
+          <div style="margin-top: 30px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid rgba(59,130,246,0.3);">
+            <!-- Banner Header -->
+            <div style="background: linear-gradient(135deg, #1a3a5c, #0f2740); padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+              <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="background: linear-gradient(135deg, #3B82F6, #1D4ED8); width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; flex-shrink: 0; box-shadow: 0 4px 12px rgba(59,130,246,0.4);">
+                  <i class="fas fa-tag"></i>
+                </div>
+                <div>
+                  <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                    <h3 style="margin: 0; color: white; font-size: 1.1rem;">DeFacto × MYTh Kart Kampanyası</h3>
+                    <span style="background: #10B981; color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 20px; font-weight: 700;">AKTİF</span>
+                  </div>
+                  <p style="margin: 0; color: rgba(255,255,255,0.7); font-size: 0.85rem;">
+                    <i class="fas fa-calendar-alt" style="margin-right:4px;"></i>
+                    20 Mayıs 2026 – 30 Haziran 2026
+                  </p>
+                </div>
+              </div>
+              <!-- Code Display -->
+              <div style="text-align: center;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Kişisel İndirim Kodunuz</div>
+                <div style="background: rgba(255,255,255,0.1); border: 2px dashed rgba(59,130,246,0.6); padding: 10px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px;">
+                  <span id="pDefactoCode" style="font-size: 1.3rem; font-weight: 800; color: #60A5FA; letter-spacing: 3px; font-family: monospace;">YAKINDA...</span>
+                  <button onclick="copyDefactoCode()" title="Kopyala" style="background:none; border:none; cursor:pointer; color: rgba(255,255,255,0.6); font-size:0.9rem; padding:2px;">
+                    <i class="fas fa-copy" id="copyIcon"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Campaign Details -->
+            <div style="background: rgba(15,39,64,0.5); padding: 16px 24px; border-top: 1px solid rgba(59,130,246,0.2);">
+              <!-- Main Offer -->
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px;">
+                <div style="background: rgba(59,130,246,0.15); border: 1px solid rgba(59,130,246,0.3); border-radius: 10px; padding: 10px 16px; flex: 1; min-width: 160px;">
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #60A5FA;">300 TL</div>
+                  <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">1500 TL+ alışverişte indirim</div>
+                </div>
+                <div style="background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 10px; padding: 10px 16px; flex: 1; min-width: 160px;">
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #34D399;">%5</div>
+                  <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">Yeni üyelere ilk siparişte ek indirim</div>
+                </div>
+                <div style="background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); border-radius: 10px; padding: 10px 16px; flex: 1; min-width: 160px;">
+                  <div style="font-size: 1.5rem; font-weight: 800; color: #FBBF24;">%3</div>
+                  <div style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">Her alışverişte Gift Puan</div>
+                </div>
+              </div>
+
+              <!-- Conditions Toggle -->
+              <details style="cursor: pointer;">
+                <summary style="color: rgba(255,255,255,0.7); font-size: 0.85rem; list-style: none; display: flex; align-items: center; gap: 6px; user-select: none;">
+                  <i class="fas fa-info-circle" style="color: #60A5FA;"></i>
+                  Kampanya koşullarını görüntüle
+                  <i class="fas fa-chevron-down" style="margin-left: auto; font-size: 0.7rem;"></i>
+                </summary>
+                <ul style="margin: 10px 0 0 0; padding-left: 20px; color: rgba(255,255,255,0.6); font-size: 0.82rem; line-height: 1.7;">
+                  <li>defacto.com ve DeFacto uygulamasından yapılan tek seferlik 1500 TL+ giyim alışverişlerinde geçerlidir</li>
+                  <li>Özel Koleksiyon Ürünleri kampanya kapsamı dışındadır</li>
+                  <li>Kullanıcı başına ayda yalnızca <strong>1 kez</strong> kullanılabilir</li>
+                  <li>Kodu sepetteki <strong>"İndirim Kodu"</strong> alanına boşluksuz giriniz</li>
+                  <li>İndirimden yararlanmak için DeFacto üye girişi yapılmalıdır</li>
+                  <li>Sipariş iptali veya iade durumunda indirim geçersiz sayılır</li>
+                </ul>
+              </details>
+            </div>
+          </div>
+          <script>
+          function copyDefactoCode() {
+            const code = document.getElementById('pDefactoCode').textContent.trim();
+            if (!code || code === 'YAKINDA...' || code === 'YAKINDA EKLENECEK') return;
+            navigator.clipboard.writeText(code).then(() => {
+              const icon = document.getElementById('copyIcon');
+              icon.className = 'fas fa-check';
+              icon.style.color = '#10B981';
+              setTimeout(() => { icon.className = 'fas fa-copy'; icon.style.color = ''; }, 2000);
+            });
+          }
+          </script>
 
           <!-- Gamification Badges Section -->
           <div style="margin-top: 30px;">
@@ -165,11 +245,11 @@
     </main>
   </div>
   
-  <footer style="padding: 20px 5%; background: var(--bg-card); border-top: 1px solid rgba(255,255,255,0.05); text-align: center; margin-top: 50px;">
-    <p style="color: var(--text-secondary); font-size: 0.8rem; opacity: 0.8;">
-      Developer: <strong>Sahra Yağmur Berk</strong> 
-      <a href="https://linkedin.com/in/sahrayagmurberk" target="_blank" style="color: var(--primary); text-decoration: none; margin-left: 5px;">
-        LinkedIn
+  <footer class="dev-footer">
+    <p>
+      Developer: <strong>Sahra Yağmur Berk</strong>
+      <a href="https://linkedin.com/in/sahrayagmurberk" target="_blank">
+        <i class="fab fa-linkedin"></i> LinkedIn
       </a>
     </p>
   </footer>
@@ -177,7 +257,7 @@
   <!-- Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-  <script src="js/data.js?v=10"></script>
+  <script src="js/data.js?v=11"></script>
   <script src="js/profile.js?v=10"></script>
 </body>
 </html>
