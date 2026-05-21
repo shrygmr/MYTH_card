@@ -17,7 +17,49 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // ─── KULLANIM KOŞULLARI KONTROLÜ ─────────────────────────────────
+    // Her kullanıcı için ayrı ayrı kontrol edilir (identifier bazlı)
     const identifier = session.identifier;
+    const termsKey = `myth_terms_accepted_${identifier}`;
+    
+    if (!localStorage.getItem(termsKey)) {
+        // İlk giriş: Modalı göster, sayfanın geri kalanını kilitle
+        const modal = document.getElementById('termsModal');
+        const checkbox = document.getElementById('termsCheckbox');
+        const acceptBtn = document.getElementById('termsAcceptBtn');
+
+        // body scroll kilitle
+        document.body.style.overflow = 'hidden';
+        modal.style.display = 'block';
+
+        // Checkbox değişince butonu aktifleştir
+        checkbox.addEventListener('change', () => {
+            if (checkbox.checked) {
+                acceptBtn.disabled = false;
+                acceptBtn.style.opacity = '1';
+                acceptBtn.style.cursor = 'pointer';
+                acceptBtn.style.background = 'linear-gradient(135deg, #2563EB, #1D4ED8)';
+                acceptBtn.style.boxShadow = '0 4px 20px rgba(37,99,235,0.4)';
+            } else {
+                acceptBtn.disabled = true;
+                acceptBtn.style.opacity = '0.5';
+                acceptBtn.style.cursor = 'not-allowed';
+                acceptBtn.style.boxShadow = 'none';
+            }
+        });
+
+        // Kabul butonuna basınca kaydet ve modalı kapat
+        acceptBtn.addEventListener('click', () => {
+            if (!checkbox.checked) return;
+            localStorage.setItem(termsKey, JSON.stringify({
+                acceptedAt: new Date().toISOString(),
+                version: '1.0'
+            }));
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+    }
+    // ─────────────────────────────────────────────────────────────────
     document.getElementById('profileNameDisplay').textContent = identifier;
     
     const isStudent = session.type === 'student';
@@ -42,6 +84,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 document.getElementById('pRegDate').textContent = 'Kayıtlı';
+            }
+            
+            // DeFacto Code Logic
+            const defactoSpan = document.getElementById('pDefactoCode');
+            if (userData.defactoCode && userData.defactoCode.trim() !== '') {
+                defactoSpan.textContent = userData.defactoCode;
+                defactoSpan.style.color = '#10B981'; // Green for active
+            } else {
+                defactoSpan.textContent = 'YAKINDA EKLENECEK';
+                defactoSpan.style.color = 'var(--text-muted)';
             }
         } else {
             // Fallback if userData not found in the users list
