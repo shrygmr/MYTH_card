@@ -194,7 +194,24 @@
 
             studentSubmitBtn.textContent = 'Kaydediliyor...';
             studentSubmitBtn.disabled = true;
+            
+            // Register basic info
             users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
+            
+            // Check if this PIN has an assigned DeFacto code
+            try {
+              const defactoMapStr = localStorage.getItem('myth_defacto_map');
+              if (defactoMapStr) {
+                const defactoMap = JSON.parse(defactoMapStr);
+                if (defactoMap[pass]) {
+                  users.students[studentId].defactoCode = defactoMap[pass];
+                  console.log('Assigned DeFacto code to new student:', studentId);
+                }
+              }
+            } catch(e) {
+              console.error('Error assigning DeFacto code:', e);
+            }
+
             // Await both saves before login so data is in Firebase before redirect
             await Promise.all([
               saveUsers(users),
