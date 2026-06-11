@@ -86,26 +86,156 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('pRegDate').textContent = 'Kayıtlı';
             }
             
-            // DeFacto Code Logic
-            const defactoSpan = document.getElementById('pDefactoCode');
-            if (userData.defactoCode && userData.defactoCode.trim() !== '') {
-                defactoSpan.textContent = userData.defactoCode;
-                defactoSpan.style.color = '#10B981'; // Green for active
-            } else {
-                defactoSpan.textContent = 'YAKINDA EKLENECEK';
-                defactoSpan.style.color = 'var(--text-muted)';
+            // DeFacto Code Logic (Talep Bazlı Havuz Sistemi)
+            function refreshDefactoUI(currentUserData) {
+                const dfClaimBtnArea = document.getElementById('dfClaimBtnArea');
+                const dfCodeArea     = document.getElementById('dfCodeArea');
+                const codeSpan       = document.getElementById('pDefactoCode');
+                if (!dfClaimBtnArea || !dfCodeArea) return;
+
+                if (currentUserData.defactoCode && currentUserData.defactoCode.trim() !== '') {
+                    // User already has a code — show it
+                    dfClaimBtnArea.style.display = 'none';
+                    dfCodeArea.style.display = 'block';
+                    if (codeSpan) codeSpan.textContent = currentUserData.defactoCode;
+                } else {
+                    // No code yet — check if pool has anything
+                    const pool = window.mythDB.getDefactoPool ? window.mythDB.getDefactoPool() : [];
+                    dfClaimBtnArea.style.display = 'flex';
+                    dfClaimBtnArea.style.flexDirection = 'column';
+                    dfClaimBtnArea.style.alignItems = 'center';
+                    dfCodeArea.style.display = 'none';
+
+                    const claimBtn = document.getElementById('claimDefactoBtn');
+                    if (claimBtn) {
+                        if (pool.length === 0) {
+                            claimBtn.disabled = true;
+                            claimBtn.style.opacity = '0.5';
+                            claimBtn.style.cursor = 'not-allowed';
+                            claimBtn.innerHTML = '<i class="fas fa-times-circle"></i> Kodlar Tükendi';
+                        } else {
+                            claimBtn.disabled = false;
+                            claimBtn.style.opacity = '';
+                            claimBtn.style.cursor = 'pointer';
+                            claimBtn.innerHTML = '<i class="fas fa-ticket-alt"></i> Kod Talep Et';
+                        }
+                    }
+                }
             }
 
-            // Cookshop Code Logic
-            const csSpan = document.getElementById('pCookshopCode');
-            if (csSpan) {
-                if (userData.cookshopCode && userData.cookshopCode.trim() !== '') {
-                    csSpan.textContent = userData.cookshopCode;
-                    csSpan.style.color = '#10B981'; // Green for active
+            refreshDefactoUI(userData);
+
+            // DeFacto Claim button handler
+            const dfClaimBtn = document.getElementById('claimDefactoBtn');
+            if (dfClaimBtn && !dfClaimBtn._listenerAdded) {
+                dfClaimBtn._listenerAdded = true;
+                dfClaimBtn.addEventListener('click', async () => {
+                    // Re-read from DB to get fresh pool
+                    const pool = window.mythDB.getDefactoPool ? window.mythDB.getDefactoPool() : [];
+                    if (pool.length === 0) {
+                        alert('Üzgünüz, tüm DeFacto kodları tükenmiştir.');
+                        return;
+                    }
+
+                    dfClaimBtn.disabled = true;
+                    dfClaimBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atanıyor...';
+
+                    // Take the first code from the pool (FIFO)
+                    const assignedCode = pool.shift();
+
+                    // Save updated pool
+                    await window.mythDB.saveDefactoPool(pool);
+
+                    // Save code to user record
+                    const users = JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
+                    const session = JSON.parse(localStorage.getItem('myth_active_session') || '{}');
+                    const userId = session.identifier;
+
+                    if (users.students && users.students[userId]) {
+                        users.students[userId].defactoCode = assignedCode;
+                        users.students[userId].defactoClaimedAt = new Date().toISOString();
+                        await window.mythDB.saveUsers(users);
+
+                        // Update UI
+                        userData.defactoCode = assignedCode;
+                        refreshDefactoUI(userData);
+                    }
+                });
+            }
+
+            // Cookshop / Magnolia Code Logic (Talep Bazlı Havuz Sistemi)
+            function refreshCookshopUI(currentUserData) {
+                const csClaimBtnArea = document.getElementById('csClaimBtnArea');
+                const csCodeArea     = document.getElementById('csCodeArea');
+                const codeSpan       = document.getElementById('pCookshopCode');
+                if (!csClaimBtnArea || !csCodeArea) return;
+
+                if (currentUserData.cookshopCode && currentUserData.cookshopCode.trim() !== '') {
+                    csClaimBtnArea.style.display = 'none';
+                    csCodeArea.style.display = 'block';
+                    if (codeSpan) codeSpan.textContent = currentUserData.cookshopCode;
                 } else {
-                    csSpan.textContent = 'YAKINDA EKLENECEK';
-                    csSpan.style.color = 'var(--text-muted)';
+                    const pool = window.mythDB.getCookshopPool ? window.mythDB.getCookshopPool() : [];
+                    csClaimBtnArea.style.display = 'flex';
+                    csClaimBtnArea.style.flexDirection = 'column';
+                    csClaimBtnArea.style.alignItems = 'center';
+                    csCodeArea.style.display = 'none';
+
+                    const claimBtn = document.getElementById('claimCookshopBtn');
+                    if (claimBtn) {
+                        if (pool.length === 0) {
+                            claimBtn.disabled = true;
+                            claimBtn.style.opacity = '0.5';
+                            claimBtn.style.cursor = 'not-allowed';
+                            claimBtn.innerHTML = '<i class="fas fa-times-circle"></i> Kodlar Tükendi';
+                        } else {
+                            claimBtn.disabled = false;
+                            claimBtn.style.opacity = '';
+                            claimBtn.style.cursor = 'pointer';
+                            claimBtn.innerHTML = '<i class="fas fa-ticket-alt"></i> Kod Talep Et';
+                        }
+                    }
                 }
+            }
+
+            refreshCookshopUI(userData);
+
+            const csClaimBtn = document.getElementById('claimCookshopBtn');
+            if (csClaimBtn && !csClaimBtn._listenerAdded) {
+                csClaimBtn._listenerAdded = true;
+                csClaimBtn.addEventListener('click', async () => {
+                    const pool = window.mythDB.getCookshopPool ? window.mythDB.getCookshopPool() : [];
+                    if (pool.length === 0) {
+                        alert('Üzgünüz, tüm Cookshop kodları tükenmiştir.');
+                        return;
+                    }
+
+                    csClaimBtn.disabled = true;
+                    csClaimBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Atanıyor...';
+
+                    const assignedCode = pool.shift();
+                    
+                    // Note: Ensure saveCookshopPool exists in data.js or fallback to localStorage
+                    if(window.mythDB.saveCookshopPool) {
+                        await window.mythDB.saveCookshopPool(pool);
+                    } else {
+                        localStorage.setItem('myth_cookshop_pool', JSON.stringify(pool));
+                        if(window.saveToCloud) await window.saveToCloud('myth_cookshop_pool', pool);
+                    }
+
+                    const users = JSON.parse(localStorage.getItem('myth_users') || '{"students":{}, "alumni":{}}');
+                    const session = JSON.parse(localStorage.getItem('myth_active_session') || '{}');
+                    const userId = session.identifier;
+
+                    if (users.students && users.students[userId]) {
+                        users.students[userId].cookshopCode = assignedCode;
+                        users.students[userId].cookshopClaimedAt = new Date().toISOString();
+                        await window.mythDB.saveUsers(users);
+
+                        userData.cookshopCode = assignedCode;
+                        refreshCookshopUI(userData);
+                    }
+                });
             }
 
         } else {

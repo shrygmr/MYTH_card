@@ -85,14 +85,28 @@
                   </p>
                 </div>
               </div>
-              <!-- Code Display -->
-              <div style="text-align: center;">
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Kişisel İndirim Kodunuz</div>
-                <div style="background: rgba(255,255,255,0.1); border: 2px dashed rgba(59,130,246,0.6); padding: 10px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px;">
-                  <span id="pDefactoCode" style="font-size: 1.3rem; font-weight: 800; color: #60A5FA; letter-spacing: 3px; font-family: monospace;">YAKINDA...</span>
-                  <button onclick="copyDefactoCode()" title="Kopyala" style="background:none; border:none; cursor:pointer; color: rgba(255,255,255,0.6); font-size:0.9rem; padding:2px;">
-                    <i class="fas fa-copy" id="copyIcon"></i>
+              <!-- Code Display / Claim Button -->
+              <div id="dfClaim" style="text-align: center; position:relative; z-index:1;">
+                <!-- State A: No code yet — show claim button -->
+                <div id="dfClaimBtnArea">
+                  <button id="claimDefactoBtn"
+                    style="background:linear-gradient(135deg,#3B82F6,#2563EB); color:white; border:none; padding:10px 22px; border-radius:10px; font-size:0.9rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 16px rgba(59,130,246,0.4); transition: transform 0.2s, box-shadow 0.2s; white-space:nowrap; margin: 0 auto;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 24px rgba(59,130,246,0.6)';"
+                    onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 16px rgba(59,130,246,0.4)';">
+                    <i class="fas fa-ticket-alt"></i> Kod Talep Et
                   </button>
+                  <div style="font-size:0.72rem; color:rgba(255,255,255,0.45); margin-top:6px; letter-spacing:0.5px;">Sınırlı sayıda kod mevcuttur</div>
+                </div>
+
+                <!-- State B: Has code — show it -->
+                <div id="dfCodeArea" style="display:none;">
+                  <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Kişisel İndirim Kodunuz</div>
+                  <div style="background: rgba(255,255,255,0.1); border: 2px dashed rgba(59,130,246,0.6); padding: 10px 20px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span id="pDefactoCode" style="font-size: 1.3rem; font-weight: 800; color: #60A5FA; letter-spacing: 3px; font-family: monospace;"></span>
+                    <button onclick="copyDefactoCode()" title="Kopyala" style="background:none; border:none; cursor:pointer; color: rgba(255,255,255,0.6); font-size:0.9rem; padding:2px;">
+                      <i class="fas fa-copy" id="copyIcon"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -165,14 +179,28 @@
                   </p>
                 </div>
               </div>
-              <!-- Code Display -->
-              <div style="text-align: center;">
-                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Kişisel İndirim Kodunuz</div>
-                <div style="background: rgba(255,255,255,0.1); border: 2px dashed rgba(239,68,68,0.6); padding: 10px 20px; border-radius: 10px; display: flex; align-items: center; gap: 10px;">
-                  <span id="pCookshopCode" style="font-size: 1.3rem; font-weight: 800; color: #F87171; letter-spacing: 3px; font-family: monospace;">YAKINDA...</span>
-                  <button onclick="copyCookshopCode()" title="Kopyala" style="background:none; border:none; cursor:pointer; color: rgba(255,255,255,0.6); font-size:0.9rem; padding:2px;">
-                    <i class="fas fa-copy" id="copyIconCs"></i>
+              <!-- Code Display / Claim Button -->
+              <div id="csClaim" style="text-align: center; position:relative; z-index:1;">
+                <!-- State A: No code yet — show claim button -->
+                <div id="csClaimBtnArea">
+                  <button id="claimCookshopBtn"
+                    style="background:linear-gradient(135deg,#EF4444,#B91C1C); color:white; border:none; padding:10px 22px; border-radius:10px; font-size:0.9rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:8px; box-shadow:0 4px 16px rgba(239,68,68,0.4); transition: transform 0.2s, box-shadow 0.2s; white-space:nowrap; margin:0 auto;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 24px rgba(239,68,68,0.6)';"
+                    onmouseout="this.style.transform=''; this.style.boxShadow='0 4px 16px rgba(239,68,68,0.4)';">
+                    <i class="fas fa-ticket-alt"></i> Kod Talep Et
                   </button>
+                  <div style="font-size:0.72rem; color:rgba(255,255,255,0.45); margin-top:6px; letter-spacing:0.5px;">Sınırlı sayıda kod mevcuttur</div>
+                </div>
+
+                <!-- State B: Has code — show it -->
+                <div id="csCodeArea" style="display:none;">
+                  <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px;">Kişisel İndirim Kodunuz</div>
+                  <div style="background: rgba(255,255,255,0.1); border: 2px dashed rgba(239,68,68,0.6); padding: 10px 20px; border-radius: 10px; display: inline-flex; align-items: center; justify-content:center; gap: 10px;">
+                    <span id="pCookshopCode" style="font-size: 1.3rem; font-weight: 800; color: #F87171; letter-spacing: 3px; font-family: monospace;"></span>
+                    <button onclick="copyCookshopCode()" title="Kopyala" style="background:none; border:none; cursor:pointer; color: rgba(255,255,255,0.6); font-size:0.9rem; padding:2px;">
+                      <i class="fas fa-copy" id="copyIconCs"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
