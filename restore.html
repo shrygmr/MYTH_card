@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MYTh — Firebase Restore Tool</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f0f1a;
+            color: #e0e0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 { font-size: 1.5rem; color: #e63946; margin-bottom: 8px; }
+        p { color: #aaa; margin-bottom: 24px; line-height: 1.6; }
+        .step { margin-bottom: 16px; }
+        .step label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        textarea {
+            width: 100%;
+            height: 160px;
+            background: #0d0d1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0f0;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            resize: vertical;
+        }
+        button {
+            background: #e63946;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.85; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        #log {
+            background: #0d0d1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            min-height: 120px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+            color: #aaa;
+            white-space: pre-wrap;
+        }
+        .ok  { color: #4ade80; }
+        .err { color: #f87171; }
+        .warn { color: #facc15; }
+        .info { color: #60a5fa; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔧 MYTh Firebase Restore</h1>
+        <p>Bu araç, backup JSON dosyasındaki mekan verilerini Firebase'e geri yükler ve sentinel dokümanını yeniden oluşturur.</p>
+
+        <div class="step">
+            <label>myth_venues_backup_final.json içeriğini buraya yapıştır</label>
+            <textarea id="venuesJson" placeholder='[{"id": 1000, "name": "Coffee Prime", ...}]'></textarea>
+        </div>
+
+        <button id="restoreBtn" onclick="startRestore()">🚀 Firebase'e Geri Yükle</button>
+
+        <div id="log">Hazır. Backup JSON'u yapıştırıp butona bas.</div>
+    </div>
+
+    <!-- Firebase SDK (same version as the app) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjLc8L34Ok0s7Ml55iYjEHIy2-vLncl7E",
+            authDomain: "myth-card.firebaseapp.com",
+            projectId: "myth-card",
+            storageBucket: "myth-card.firebasestorage.app",
+            messagingSenderId: "207712470529",
+            appId: "1:207712470529:web:1b3c3696cb12c72e9ee200"
+        };
+
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const logEl = document.getElementById('log');
+        function log(msg, cls='') {
+            const span = document.createElement('span');
+            span.className = cls;
+            span.textContent = msg + '\n';
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        async function startRestore() {
+            const btn = document.getElementById('restoreBtn');
+            btn.disabled = true;
+            logEl.innerHTML = '';
+
+            // 1. Parse venues JSON
+            const rawVenues = document.getElementById('venuesJson').value.trim();
+            let venues;
+            try {
+                venues = rawVenues ? JSON.parse(rawVenues) : [];
+                log(`✅ ${venues.length} mekan parse edildi.`, 'ok');
+            } catch(e) {
+                log('❌ JSON parse hatası: ' + e.message, 'err');
+                log('Lütfen geçerli bir JSON dizisi yapıştırın.', 'warn');
+                btn.disabled = false;
+                return;
+            }
+
+            log('🔄 Firebase\'e bağlanılıyor...', 'info');
+
+            try {
+                // 2. Check if myth_state has any data already
+                const stateSnapshot = await db.collection('myth_state').limit(1).get();
+                if (!stateSnapshot.empty) {
+                    log('⚠️  myth_state koleksiyonunda veri var. Devam edilecek (üzerine yazılacak).', 'warn');
+                } else {
+                    log('ℹ️  myth_state boş. Tüm veriler sıfırdan yükleniyor.', 'info');
+                }
+
+                // 3. Write venues
+                log('📝 myth_venues yazılıyor...', 'info');
+                await db.collection('myth_state').doc('myth_venues').set({
+                    data: JSON.stringify(venues)
+                });
+                log(`✅ myth_venues kaydedildi (${venues.length} mekan).`, 'ok');
+
+                // 4. Restore other empty collections if missing
+                const keysToInit = [
+                    { key: 'myth_deals',          val: '[]' },
+                    { key: 'myth_reviews',         val: '[]' },
+                    { key: 'myth_available_pins',  val: '[]' },
+                    { key: 'myth_cookshop_pool',   val: '[]' },
+                    { key: 'myth_users',           val: JSON.stringify({ students: {}, alumni: {} }) },
+                    { key: 'myth_businesses',      val: '{}' },
+                ];
+
+                for (const { key, val } of keysToInit) {
+                    const docRef = db.collection('myth_state').doc(key);
+                    const docSnap = await docRef.get();
+                    if (!docSnap.exists || docSnap.data().data === '[]' || docSnap.data().data === '{}') {
+                        await docRef.set({ data: val });
+                        log(`✅ ${key} → başlangıç değeri yazıldı.`, 'ok');
+                    } else {
+                        log(`ℹ️  ${key} → zaten mevcut, atlandı.`, 'info');
+                    }
+                }
+
+                // 5. Write admins
+                const DEFAULT_ADMINS = {
+                    "sahra.admin": { password: "sahra0267", name: "Sahra" },
+                    "batu.admin":  { password: "MythAdmin2026!02", name: "Batu" },
+                    "zersah.admin":{ password: "MythAdmin2026!03", name: "Zerşah" },
+                    "ece.admin":   { password: "MythAdmin2026!04", name: "Ece" },
+                    "mert.admin":  { password: "MythAdmin2026!05", name: "Mert" },
+                    "sila.admin":  { password: "MythAdmin2026!06", name: "Sıla" },
+                    "murat.admin": { password: "MythAdmin2026!07", name: "Murat" },
+                    "cansin.admin":{ password: "MythAdmin2026!08", name: "Cansın" },
+                    "peker.admin": { password: "MythAdmin2026!09", name: "Peker" },
+                    "begum.admin": { password: "MythAdmin2026!10", name: "Begüm" }
+                };
+                const adminsDoc = await db.collection('myth_state').doc('myth_admins').get();
+                if (!adminsDoc.exists) {
+                    await db.collection('myth_state').doc('myth_admins').set({ data: JSON.stringify(DEFAULT_ADMINS) });
+                    log('✅ myth_admins → varsayılan adminler yazıldı.', 'ok');
+                } else {
+                    log('ℹ️  myth_admins → zaten mevcut, atlandı.', 'info');
+                }
+
+                // 6. Re-write sentinel (most important step)
+                log('🔐 Sentinel (myth_meta/initialized) yeniden oluşturuluyor...', 'info');
+                await db.collection('myth_meta').doc('initialized').set({
+                    initializedAt: new Date().toISOString(),
+                    version: 1,
+                    restoredAt: new Date().toISOString()
+                });
+                log('✅ Sentinel yazıldı! Artık veriler korunacak.', 'ok');
+
+                log('', '');
+                log('🎉 RESTORE TAMAMLANDI!', 'ok');
+                log('Admin paneline gidip verileri kontrol edebilirsin.', 'ok');
+                log('Bu sayfayı kapatabilirsin.', 'info');
+
+            } catch(e) {
+                log('❌ Firebase hatası: ' + e.message, 'err');
+                log('Firebase Console\'dan Firestore kurallarını kontrol et.', 'warn');
+                log('Rules → read,write: if request.auth == null; ← gerekebilir', 'warn');
+            }
+
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>

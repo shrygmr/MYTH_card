@@ -95,6 +95,15 @@
         // mythDB API — defined HERE so window.db is always valid
         // -------------------------------------------------------
         window.mythDB = {
+
+    getDefactoPool: function() {
+        return JSON.parse(localStorage.getItem('myth_defacto_pool') || '[]');
+    },
+    saveDefactoPool: async function(poolArray) {
+        localStorage.setItem('myth_defacto_pool', JSON.stringify(poolArray));
+        await saveToCloud('myth_defacto_pool', poolArray);
+    },
+
             // Getters always read from localStorage (which was loaded from Firebase)
             getVenues:        () => JSON.parse(localStorage.getItem('myth_venues')         || '[]'),
             getDeals:         () => JSON.parse(localStorage.getItem('myth_deals')          || '[]'),
@@ -216,6 +225,15 @@
 
         // Fallback mythDB without Firebase
         window.mythDB = {
+
+    getDefactoPool: function() {
+        return JSON.parse(localStorage.getItem('myth_defacto_pool') || '[]');
+    },
+    saveDefactoPool: async function(poolArray) {
+        localStorage.setItem('myth_defacto_pool', JSON.stringify(poolArray));
+        await saveToCloud('myth_defacto_pool', poolArray);
+    },
+
             getVenues:        () => JSON.parse(localStorage.getItem('myth_venues')         || '[]'),
             getDeals:         () => JSON.parse(localStorage.getItem('myth_deals')          || '[]'),
             getReviews:       () => JSON.parse(localStorage.getItem('myth_reviews')        || '[]'),

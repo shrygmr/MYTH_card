@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>MYTh — Firebase Auth Migration</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0a0a14;
+            color: #e0e0f0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: #12121e;
+            border: 1px solid #2a2a3e;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        h1 { font-size: 1.4rem; color: #e63946; margin-bottom: 6px; }
+        .subtitle { color: #888; margin-bottom: 24px; font-size: 0.9rem; }
+        .warn {
+            background: rgba(234,179,8,0.1);
+            border: 1px solid rgba(234,179,8,0.3);
+            border-radius: 10px;
+            padding: 14px 18px;
+            color: #fbbf24;
+            font-size: 0.85rem;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        button {
+            background: #e63946;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 13px 24px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            transition: opacity 0.2s;
+        }
+        button:hover { opacity: 0.85; }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        #log {
+            background: #080810;
+            border: 1px solid #1a1a2e;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: monospace;
+            font-size: 0.78rem;
+            min-height: 160px;
+            max-height: 450px;
+            overflow-y: auto;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            line-height: 1.7;
+        }
+        .ok   { color: #4ade80; }
+        .err  { color: #f87171; }
+        .warn2 { color: #facc15; }
+        .info { color: #60a5fa; }
+        .dim  { color: #555; }
+        .progress {
+            background: #1a1a2e;
+            border-radius: 8px;
+            height: 6px;
+            margin-top: 14px;
+            overflow: hidden;
+            display: none;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #e63946, #ff6b77);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid #2a2a3e;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-box .n { font-size: 1.6rem; font-weight: 800; }
+        .stat-box .l { font-size: 0.72rem; color: #666; margin-top: 2px; }
+        .n-blue   { color: #60a5fa; }
+        .n-green  { color: #4ade80; }
+        .n-yellow { color: #facc15; }
+        .n-red    { color: #f87171; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🔄 MYTh Firebase Auth Migration</h1>
+        <p class="subtitle">myth_users tablosundaki mevcut kullanıcıları Firebase Authentication'a aktarır.</p>
+
+        <div class="warn">
+            ⚠️ <strong>Dikkat:</strong> Bu araç yalnızca bir kez çalıştırılmalıdır. Mevcut kullanıcılar aynı öğrenci numarası + şifresiyle giriş yapmaya devam edebilecek.<br>
+            Bu sayfayı çalıştırmadan önce <strong>restore.html</strong> ile verilerin Firebase'e yüklendiğinden emin olun.
+        </div>
+
+        <button id="startBtn" onclick="startMigration()">🚀 Migration'ı Başlat</button>
+
+        <div class="progress" id="progressBar"><div class="progress-bar" id="progressFill"></div></div>
+
+        <div class="stats-row">
+            <div class="stat-box"><div class="n n-blue" id="sTotal">0</div><div class="l">Toplam</div></div>
+            <div class="stat-box"><div class="n n-green" id="sOk">0</div><div class="l">Başarılı</div></div>
+            <div class="stat-box"><div class="n n-yellow" id="sSkip">0</div><div class="l">Zaten Var</div></div>
+            <div class="stat-box"><div class="n n-red" id="sErr">0</div><div class="l">Hata</div></div>
+        </div>
+
+        <div id="log">Hazır. Başlatmak için butona bas.</div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBjLc8L34Ok0s7Ml55iYjEHIy2-vLncl7E",
+            authDomain: "myth-card.firebaseapp.com",
+            projectId: "myth-card",
+            storageBucket: "myth-card.firebasestorage.app",
+            messagingSenderId: "207712470529",
+            appId: "1:207712470529:web:1b3c3696cb12c72e9ee200"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db   = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Email builders (must match data.js)
+        const mythEmail = {
+            student:  (id)    => `${id.toLowerCase()}@s.myth`,
+            alumni:   (phone) => `${phone}@a.myth`,
+            admin:    (id)    => `${id.toLowerCase()}@adm.myth`,
+            business: (id)    => `${id.toLowerCase()}@b.myth`,
+        };
+
+        const logEl = document.getElementById('log');
+        let statsTotal = 0, statsOk = 0, statsSkip = 0, statsErr = 0;
+
+        function log(msg, cls = '') {
+            const span = document.createElement('span');
+            span.className = cls;
+            span.textContent = msg + '\n';
+            logEl.appendChild(span);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+
+        function updateStats() {
+            document.getElementById('sTotal').textContent = statsTotal;
+            document.getElementById('sOk').textContent    = statsOk;
+            document.getElementById('sSkip').textContent  = statsSkip;
+            document.getElementById('sErr').textContent   = statsErr;
+        }
+
+        function setProgress(current, total) {
+            document.getElementById('progressBar').style.display = 'block';
+            document.getElementById('progressFill').style.width = Math.round(current / total * 100) + '%';
+        }
+
+        async function migrateUser(type, identifier, password, extraProfile = {}) {
+            const emailFn = mythEmail[type];
+            if (!emailFn) { log(`  ⚠️ Bilinmeyen tip: ${type}`, 'warn2'); statsErr++; return; }
+            const email = emailFn(identifier);
+
+            try {
+                // Try to create Firebase Auth account
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid  = cred.user.uid;
+
+                // Save profile to Firestore
+                const profile = {
+                    type,
+                    identifier,
+                    migratedAt: new Date().toISOString(),
+                    ...extraProfile
+                };
+                await db.collection('user_profiles').doc(uid).set(profile);
+
+                // Sign out immediately (we don't want to stay signed in as each migrated user)
+                await auth.signOut();
+
+                log(`  ✅ [${type.toUpperCase()}] ${identifier} → uid: ${uid.substring(0,8)}...`, 'ok');
+                statsOk++;
+            } catch (err) {
+                if (err.code === 'auth/email-already-in-use') {
+                    log(`  ℹ️  [${type.toUpperCase()}] ${identifier} → zaten Firebase Auth'ta`, 'dim');
+                    statsSkip++;
+                } else if (err.code === 'auth/weak-password') {
+                    log(`  ⚠️  [${type.toUpperCase()}] ${identifier} → şifre çok kısa (min 6 karakter), atlandı`, 'warn2');
+                    statsSkip++;
+                } else if (err.code === 'auth/invalid-email') {
+                    log(`  ❌ [${type.toUpperCase()}] ${identifier} → geçersiz email formatı: ${email}`, 'err');
+                    statsErr++;
+                } else {
+                    log(`  ❌ [${type.toUpperCase()}] ${identifier} → ${err.code}: ${err.message}`, 'err');
+                    statsErr++;
+                }
+            }
+        }
+
+        async function startMigration() {
+            const btn = document.getElementById('startBtn');
+            btn.disabled = true;
+            logEl.innerHTML = '';
+            statsTotal = statsOk = statsSkip = statsErr = 0;
+            updateStats();
+
+            log('🔄 Firestore\'dan veriler yükleniyor...', 'info');
+
+            try {
+                // Load myth_users from Firestore
+                const usersDoc = await db.collection('myth_state').doc('myth_users').get();
+                if (!usersDoc.exists) {
+                    log('❌ myth_users dokümanı bulunamadı. restore.html ile önce veriyi yükleyin.', 'err');
+                    btn.disabled = false;
+                    return;
+                }
+                const usersData = JSON.parse(usersDoc.data().data || '{"students":{}, "alumni":{}}');
+
+                // Load myth_admins from Firestore
+                const adminsDoc = await db.collection('myth_state').doc('myth_admins').get();
+                const adminsData = adminsDoc.exists ? JSON.parse(adminsDoc.data().data || '{}') : {};
+
+                // Load myth_businesses from Firestore
+                const bizDoc = await db.collection('myth_state').doc('myth_businesses').get();
+                const bizData = bizDoc.exists ? JSON.parse(bizDoc.data().data || '{}') : {};
+
+                const students  = Object.entries(usersData.students || {});
+                const alumni    = Object.entries(usersData.alumni   || {});
+                const admins    = Object.entries(adminsData);
+                const businesses = Object.entries(bizData);
+
+                const total = students.length + alumni.length + admins.length + businesses.length;
+                statsTotal = total;
+                updateStats();
+
+                log(`\n📊 Toplam ${total} kullanıcı bulundu:`, 'info');
+                log(`   • ${students.length} öğrenci`, 'info');
+                log(`   • ${alumni.length} mezun`, 'info');
+                log(`   • ${admins.length} admin`, 'info');
+                log(`   • ${businesses.length} işletme\n`, 'info');
+
+                let processed = 0;
+
+                // Migrate Students
+                if (students.length > 0) {
+                    log('── Öğrenciler ──', 'info');
+                    for (const [studentId, data] of students) {
+                        if (!data.password) { log(`  ⚠️  ${studentId} şifresi yok, atlandı`, 'warn2'); statsSkip++; processed++; setProgress(processed, total); updateStats(); continue; }
+                        await migrateUser('student', studentId, data.password, {
+                            registeredAt: data.registeredAt || '',
+                            ...(data.defactoCode  ? { defactoCode:  data.defactoCode  } : {}),
+                            ...(data.cookshopCode ? { cookshopCode: data.cookshopCode } : {}),
+                        });
+                        processed++;
+                        setProgress(processed, total);
+                        updateStats();
+                        // Small delay to avoid Firebase Auth rate limiting
+                        await new Promise(r => setTimeout(r, 200));
+                    }
+                }
+
+                // Migrate Alumni
+                if (alumni.length > 0) {
+                    log('\n── Mezunlar ──', 'info');
+                    for (const [phone, data] of alumni) {
+                        if (!data.password) { log(`  ⚠️  ${phone} şifresi yok, atlandı`, 'warn2'); statsSkip++; processed++; setProgress(processed, total); updateStats(); continue; }
+                        await migrateUser('alumni', phone, data.password, {
+                            registeredAt: data.registeredAt || '',
+                        });
+                        processed++;
+                        setProgress(processed, total);
+                        updateStats();
+                        await new Promise(r => setTimeout(r, 200));
+                    }
+                }
+
+                // Migrate Admins
+                if (admins.length > 0) {
+                    log('\n── Adminler ──', 'info');
+                    for (const [adminId, data] of admins) {
+                        await migrateUser('admin', adminId, data.password, {
+                            name: data.name || adminId,
+                        });
+                        processed++;
+                        setProgress(processed, total);
+                        updateStats();
+                        await new Promise(r => setTimeout(r, 200));
+                    }
+                }
+
+                // Migrate Businesses
+                if (businesses.length > 0) {
+                    log('\n── İşletmeler ──', 'info');
+                    for (const [bizId, data] of businesses) {
+                        await migrateUser('business', bizId, data.password, {
+                            name:    data.name    || bizId,
+                            venueId: data.venueId || null,
+                        });
+                        processed++;
+                        setProgress(processed, total);
+                        updateStats();
+                        await new Promise(r => setTimeout(r, 200));
+                    }
+                }
+
+                log('\n', '');
+                log('🎉 MİGRASYON TAMAMLANDI!', 'ok');
+                log(`   ✅ ${statsOk} kullanıcı başarıyla taşındı`, 'ok');
+                log(`   ℹ️  ${statsSkip} kullanıcı zaten vardı / atlandı`, 'dim');
+                if (statsErr > 0) log(`   ❌ ${statsErr} kullanıcı hata aldı (log'u inceleyin)`, 'err');
+                log('\nArtık güvenlik kurallarını Firebase Console\'dan güncelleyebilirsiniz.', 'info');
+                log('Bu sayfa işi bitti — kapatabilirsiniz.', 'dim');
+
+            } catch (e) {
+                log('❌ Kritik hata: ' + e.message, 'err');
+                console.error(e);
+            }
+
+            btn.disabled = false;
+            btn.textContent = '✅ Tamamlandı';
+        }
+    </script>
+</body>
+</html>

@@ -95,6 +95,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 defactoSpan.textContent = 'YAKINDA EKLENECEK';
                 defactoSpan.style.color = 'var(--text-muted)';
             }
+
+            // Cookshop Code Logic
+            const csSpan = document.getElementById('pCookshopCode');
+            if (csSpan) {
+                if (userData.cookshopCode && userData.cookshopCode.trim() !== '') {
+                    csSpan.textContent = userData.cookshopCode;
+                    csSpan.style.color = '#10B981'; // Green for active
+                } else {
+                    csSpan.textContent = 'YAKINDA EKLENECEK';
+                    csSpan.style.color = 'var(--text-muted)';
+                }
+            }
+
         } else {
             // Fallback if userData not found in the users list
             document.getElementById('pCardNo').textContent = 'Kayıtlı';
