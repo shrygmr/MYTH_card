@@ -1,0 +1,95 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─────────────────────────────────────────────────────────────
+    // HELPER FUNCTIONS
+    // ─────────────────────────────────────────────────────────────
+
+    // Sadece bilinen anahtarlara izin ver
+    function isKnownKey(docId) {
+      return docId in [
+        'myth_venues', 'myth_deals', 'myth_reviews', 'myth_users',
+        'myth_admins', 'myth_businesses', 'myth_available_pins',
+        'myth_cookshop_pool', 'myth_defacto_pool', 'myth_defacto_map'
+      ];
+    }
+
+    // Payload: sadece 'data' alanı içermeli ve boyut sınırı
+    function isValidPayload() {
+      return request.resource.data.keys().hasOnly(['data'])
+          && request.resource.data.data is string
+          && request.resource.data.data.size() < 950000;
+    }
+
+    // Admin kontrolü: user_profiles/{uid}.type == 'admin'
+    function isAdmin() {
+      return request.auth != null
+          && exists(/databases/$(database)/documents/user_profiles/$(request.auth.uid))
+          && get(/databases/$(database)/documents/user_profiles/$(request.auth.uid)).data.type == 'admin';
+    }
+
+    // Herhangi bir giriş yapmış kullanıcı
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // user_profiles — her kullanıcı kendi profilini okur/yazar
+    // Adminler herkesi görebilir
+    // ─────────────────────────────────────────────────────────────
+    match /user_profiles/{uid} {
+      // Kendi profilini okuyabilir veya admin her profili okuyabilir
+      allow read: if isSignedIn() && (request.auth.uid == uid || isAdmin());
+
+      // Kendi profilini oluşturabilir/güncelleyebilir (kayıt sırasında)
+      allow create, update: if isSignedIn()
+                            && request.auth.uid == uid
+                            && request.resource.data.keys().hasAll(['type', 'identifier'])
+                            && request.resource.data.type in ['student', 'alumni', 'admin', 'business'];
+
+      // Silme: yasak
+      allow delete: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // myth_meta — Sentinel dokümanı
+    // Herkes okuyabilir (uygulama sentinel kontrolü yapıyor)
+    // Client'tan yazma kapalı (sadece restore.html ile)
+    // ─────────────────────────────────────────────────────────────
+    match /myth_meta/{docId} {
+      allow read: if true;
+      // Sentinel yalnızca henüz yoksa oluşturulabilir (ilk başlatma)
+      allow create: if !exists(/databases/$(database)/documents/myth_meta/initialized)
+                    || isAdmin();
+      allow update, delete: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // myth_state — Uygulama veritabanı
+    // ─────────────────────────────────────────────────────────────
+    match /myth_state/{docId} {
+      // OKUMA: Herkese açık (giriş yapmadan mekan listesi görünsün)
+      allow read: if true;
+
+      // YAZMA: Sadece giriş yapanlar + bilinen anahtar + geçerli payload
+      // Reviews, users, pins, pools: giriş yapmış herkes (kayıt ve kod talep için)
+      // Diğerleri (venues, deals, admins): sadece admin
+      allow create, update: if isSignedIn()
+                            && isKnownKey(docId)
+                            && isValidPayload()
+                            && (docId in ['myth_reviews', 'myth_users', 'myth_available_pins', 'myth_cookshop_pool', 'myth_defacto_pool'] || isAdmin());
+
+      // SİLME: Hiçbir zaman izin verme
+      allow delete: if false;
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Diğer tüm koleksiyonlar — tamamen kapalı
+    // ─────────────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+  }
+}
