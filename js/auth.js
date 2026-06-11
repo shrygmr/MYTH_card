@@ -194,26 +194,13 @@
             return;
           }
 
-          // ── DURUM 4: PIN havuzda YOK — daha önce kayıt olmuş ama myth_users'a düşmemiş olabilir ──
-          // Şifre eşleşmesi: myth_users'ta bu şifreyle kayıtlı başka biri var mı?
-          const isPinUsedByOther = Object.values(users.students).some(u => u.password === pass);
-          if (isPinUsedByOther) {
-            showError(studentForm, 'Bu şifre zaten başka bir öğrenci numarasına kayıtlı.');
-            studentSubmitBtn.textContent = 'Kayıt Ol ve Giriş Yap';
-            studentSubmitBtn.disabled = false;
-            return;
-          }
+          // ── DURUM 4: PIN havuzda YOK, myth_users'ta da YOK ──
+          // Bu kişi hiç kayıt olmamış ve geçersiz/uydurma şifre giriyor.
+          // GÜVENLIK: Kesinlikle içeri alma!
+          showError(studentForm, 'Bu şifre geçersiz. Lütfen kartınızın üzerindeki şifreyi doğru girdiğinizden emin olun. Sorun yaşıyorsanız yöneticiye başvurun.');
+          studentSubmitBtn.textContent = 'Kayıt Ol ve Giriş Yap';
+          studentSubmitBtn.disabled = false;
 
-          // PIN ne havuzda ne de başka birinde — bu kişi daha önce kayıt olmuş ama myth_users'a yazılamamış.
-          // Kurtarma: Bu kişiyi sisteme ekle ve giriş yaptır.
-          console.log('[MYTh] Kurtarma modu: myth_users dışında kalmış kullanıcı tespit edildi:', studentId);
-          users.students[studentId] = {
-            password:    pass,
-            registeredAt: new Date().toISOString(),
-            recoveredAt:  new Date().toISOString()
-          };
-          await saveUsers(users);
-          loginUser('student', studentId);
         });
       });
     }
