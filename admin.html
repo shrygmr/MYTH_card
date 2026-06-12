@@ -149,6 +149,18 @@
             <h2>Kayıtlı Kullanıcılar</h2>
             <p style="color: var(--text-muted);">Sisteme kayıtlı öğrenci ve mezunların şifre eşleştirmelerini görebilirsiniz.</p>
           </div>
+          <div id="usersStats" style="margin-bottom: 20px; padding: 15px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 style="margin: 0;">İstatistikler</h3>
+              <div style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">Toplam: <span id="totalUsersCount">0</span> Kullanıcı</div>
+            </div>
+            <div>
+              <h4 style="margin: 0 0 10px 0; font-size: 1rem; color: var(--text-muted);">Tarihe Göre Kayıtlar</h4>
+              <ul id="usersByDateList" style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px;">
+                <!-- JS populated -->
+              </ul>
+            </div>
+          </div>
           <div class="table-container">
             <table class="admin-table">
               <thead>

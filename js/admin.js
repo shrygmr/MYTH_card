@@ -362,9 +362,24 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!tbody) return;
         
         let html = '';
+        let totalCount = 0;
+        const dateStats = {};
+
+        // Helper to track stats
+        const trackStats = (data) => {
+            totalCount++;
+            let dateStr = 'Bilinmeyen Tarih';
+            if (data.registeredAt) {
+                // Sadece gün ay yıl kısmını al
+                const d = new Date(data.registeredAt);
+                dateStr = d.toLocaleDateString('tr-TR');
+            }
+            dateStats[dateStr] = (dateStats[dateStr] || 0) + 1;
+        };
 
         // Students
         for (const [id, data] of Object.entries(users.students)) {
+            trackStats(data);
             const date = data.registeredAt ? new Date(data.registeredAt).toLocaleString('tr-TR') : 'Bilinmiyor';
             html += `
                 <tr>
@@ -378,6 +393,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Alumni
         for (const [phone, data] of Object.entries(users.alumni)) {
+            trackStats(data);
             const date = data.registeredAt ? new Date(data.registeredAt).toLocaleString('tr-TR') : 'Bilinmiyor';
             html += `
                 <tr>
@@ -390,6 +406,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tbody.innerHTML = html || '<tr><td colspan="4" style="text-align:center;">Henüz kayıtlı kullanıcı yok.</td></tr>';
+
+        // Update Stats UI
+        const totalUsersCountEl = document.getElementById('totalUsersCount');
+        const usersByDateListEl = document.getElementById('usersByDateList');
+        
+        if (totalUsersCountEl) totalUsersCountEl.textContent = totalCount;
+        
+        if (usersByDateListEl) {
+            let statsHtml = '';
+            // Tarihe göre ters sırala (en yeni en üstte)
+            const sortedDates = Object.keys(dateStats).sort((a, b) => {
+                if (a === 'Bilinmeyen Tarih') return 1;
+                if (b === 'Bilinmeyen Tarih') return -1;
+                // 'DD.MM.YYYY' formatındaki tarihleri sıralama için uygun hale getir
+                const partsA = a.split('.');
+                const partsB = b.split('.');
+                if (partsA.length === 3 && partsB.length === 3) {
+                    const [d1, m1, y1] = partsA;
+                    const [d2, m2, y2] = partsB;
+                    return new Date(y2, m2 - 1, d2) - new Date(y1, m1 - 1, d1);
+                }
+                return 0;
+            });
+
+            for (const dateStr of sortedDates) {
+                statsHtml += `
+                    <li style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between;">
+                        <span>${dateStr}</span>
+                        <span style="font-weight: bold; color: var(--primary);">${dateStats[dateStr]}</span>
+                    </li>
+                `;
+            }
+            usersByDateListEl.innerHTML = statsHtml || '<li style="color: var(--text-muted);">Veri yok</li>';
+        }
     }
 
     // Init
