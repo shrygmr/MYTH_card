@@ -280,7 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             statsAnimated = true;
             const vCount = window.venues ? window.venues.length : 0;
             animateNumber('statMembers', 0, 500, 1500, '+');
-            animateNumber('statVenues', 0, vCount, 1000, '');
+            animateNumber('statVenues', 0, 99, 1000, '+');
             animateNumber('statDiscount', 0, 30, 1200, '', '%', true);
         }
     }
