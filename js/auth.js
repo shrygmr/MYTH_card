@@ -124,7 +124,7 @@
           studentSubmitBtn.textContent  = 'Giriş Yap';
         } else {
           studentHelpText.style.display = 'block';
-          studentHelpText.textContent   = 'Yeni kayıt için kartınızdaki şifreyi girin (Örn: 4567-03)';
+          studentHelpText.textContent   = 'Yeni kayıt için kartınızdaki şifreyi girin (Örn: 4567-03 veya 123456)';
           studentSubmitBtn.textContent  = 'Kayıt Ol ve Giriş Yap';
         }
       });
@@ -155,7 +155,7 @@
           // ── DURUM 2: myth_users'ta YOK — önce PIN formatı kontrolü ──
           const pinRegex = /^[A-Z0-9]{4}-[A-Z0-9]{2}$/;
           if (!pinRegex.test(pass)) {
-            showError(studentForm, 'Lütfen kartınızın üzerindeki geçerli şifreyi girin (Örn: 4567-03).');
+            showError(studentForm, 'Lütfen kartınızın üzerindeki geçerli şifreyi girin (Örn: 4567-03 veya 123456).');
             studentSubmitBtn.textContent = 'Kayıt Ol ve Giriş Yap';
             studentSubmitBtn.disabled = false;
             return;
