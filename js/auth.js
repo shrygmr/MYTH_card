@@ -178,10 +178,19 @@
             // Yeni kayıt
             users.students[studentId] = { password: pass, registeredAt: new Date().toISOString() };
 
-            // defacto haritasından kod ata (varsa)
+            // defacto haritasından kod ata (varsa), yoksa havuzdan ata
             try {
               const defactoMap = JSON.parse(localStorage.getItem('myth_defacto_map') || '{}');
-              if (defactoMap[pass]) users.students[studentId].defactoCode = defactoMap[pass];
+              if (defactoMap[pass]) {
+                users.students[studentId].defactoCode = defactoMap[pass];
+              } else if (window.mythDB && window.mythDB.getDefactoPool) {
+                const pool = window.mythDB.getDefactoPool();
+                if (pool && pool.length > 0) {
+                  const assignedCode = pool.shift();
+                  users.students[studentId].defactoCode = assignedCode;
+                  window.mythDB.saveDefactoPool(pool);
+                }
+              }
             } catch(e) {}
 
             await Promise.all([
