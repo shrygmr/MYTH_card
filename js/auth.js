@@ -153,7 +153,7 @@
           }
 
           // ── DURUM 2: myth_users'ta YOK — önce PIN formatı kontrolü ──
-          const pinRegex = /^[A-Z0-9]{4}-[A-Z0-9]{2}$/;
+          const pinRegex = /^([A-Z0-9]{4}-[A-Z0-9]{2}|[A-Z0-9]{6})$/;
           if (!pinRegex.test(pass)) {
             showError(studentForm, 'Lütfen kartınızın üzerindeki geçerli şifreyi girin (Örn: 4567-03 veya 123456).');
             studentSubmitBtn.textContent = 'Kayıt Ol ve Giriş Yap';
